@@ -2,20 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "motion/react";
-
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-
 import {
   ArrowRight,
   Check,
@@ -28,8 +14,21 @@ import {
   ShoppingBag,
   Sprout,
   Truck,
+  Users,
   X,
 } from "lucide-react";
+import { motion, useScroll, useTransform } from "motion/react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 /* -------------------------------------------------------------------------- */
 /* DATA                                                                       */
@@ -71,6 +70,7 @@ const trustItems = [
 
 const products = [
   {
+    slug: "traditional-rice",
     name: "Traditional Rice",
     description:
       "Naturally grown, hand-selected rice sourced directly from growers we work with regularly.",
@@ -79,6 +79,7 @@ const products = [
     emoji: "🌾",
   },
   {
+    slug: "traditional-millets",
     name: "Traditional Millets",
     description:
       "Traditional grains grown with care and brought to nearby families through our local network.",
@@ -87,6 +88,7 @@ const products = [
     emoji: "🌾",
   },
   {
+    slug: "cold-pressed-oils",
     name: "Cold-Pressed Oils",
     description:
       "Slow-extracted using traditional methods — no heat, no chemicals, no shortcuts.",
@@ -131,6 +133,71 @@ const faqs = [
 ];
 
 /* -------------------------------------------------------------------------- */
+/* HARVEST MARQUEE                                                            */
+/* -------------------------------------------------------------------------- */
+
+function HarvestMarquee() {
+  const words = [
+    ["☀", "HARVESTED BY THE SUN"],
+    ["☾", "BLESSED BY THE MOON"],
+    ["🌱", "GROWN WITH CARE"],
+    ["♡", "SHARED WITH TRUST"],
+  ];
+
+  return (
+    <section
+      aria-label="Amruta Dhaanya philosophy"
+      className="relative overflow-hidden border-y border-[#d9e4d4] bg-[#edf3e9] py-5"
+    >
+      <motion.div
+        animate={{
+          x: ["-10%", "110%"],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="pointer-events-none absolute top-0 h-full w-40 bg-white/30 blur-3xl"
+      />
+
+      <motion.div
+        className="flex w-max items-center"
+        animate={{
+          x: ["0%", "-50%"],
+        }}
+        transition={{
+          duration: 24,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        {[...Array(3)].flatMap((_, repeatIndex) =>
+          words.map(([icon, word]) => (
+            <div
+              key={`${repeatIndex}-${word}`}
+              className="flex items-center"
+            >
+              <span className="mx-6 text-lg text-[#78966d] sm:mx-10">
+                {icon}
+              </span>
+
+              <span className="whitespace-nowrap text-sm font-semibold tracking-[0.28em] text-[#315b3a] sm:text-base">
+                {word}
+              </span>
+
+              <span className="mx-6 text-[#9aaf91] sm:mx-10">
+                ✦
+              </span>
+            </div>
+          ))
+        )}
+      </motion.div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* HOME                                                                       */
 /* -------------------------------------------------------------------------- */
 
@@ -140,7 +207,11 @@ export default function Home() {
 
   const { scrollYProgress } = useScroll();
 
-  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 80]);
+  const heroY = useTransform(
+    scrollYProgress,
+    [0, 0.3],
+    [0, 80]
+  );
 
   const heroOpacity = useTransform(
     scrollYProgress,
@@ -148,25 +219,10 @@ export default function Home() {
     [1, 0.7]
   );
 
-  const whatsappNumber = "919177751088";
-
-  const openWhatsApp = (customMessage?: string) => {
-    const message =
-      customMessage ||
-      (search
-        ? `Hello Amruta Dhaanya, I would like to check availability for: ${search}`
-        : "Hello Amruta Dhaanya, I would like to check today's fresh availability.");
-
-    window.open(
-      `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-  };
-
   return (
-    <main className="min-h-screen bg-[#f8f7f1] text-[#25352a]">
+    <main className="min-h-screen overflow-hidden bg-[#f8f7f1] text-[#24352a]">
       {/* ------------------------------------------------------------------ */}
-      {/* ACCESSIBILITY                                                       */}
+      {/* ACCESSIBILITY SKIP LINKS                                           */}
       {/* ------------------------------------------------------------------ */}
 
       <div className="sr-only focus-within:not-sr-only">
@@ -185,7 +241,7 @@ export default function Home() {
       <motion.div
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-[#234f32] px-4 py-2.5 text-center text-sm font-medium text-white"
+        className="bg-[#234f32] px-4 py-2 text-center text-sm font-medium text-white"
       >
         🌱 Fresh availability updated every morning.
       </motion.div>
@@ -196,11 +252,14 @@ export default function Home() {
 
       <header className="sticky top-0 z-50 border-b border-[#dfe5d8]/80 bg-[#f8f7f1]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[76px] max-w-[1280px] items-center justify-between px-5 lg:px-8">
-          <Link href="/" className="group flex items-center gap-3">
+          <Link
+            href="/"
+            className="group flex items-center gap-3"
+          >
             <motion.div
               whileHover={{
-                rotate: 5,
-                scale: 1.05,
+                rotate: 8,
+                scale: 1.06,
               }}
               whileTap={{
                 scale: 0.95,
@@ -221,44 +280,22 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* DESKTOP NAVIGATION */}
-
           <nav className="hidden items-center gap-8 lg:flex">
-            <Link
-              href="/"
-              className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
-            >
-              Home
-            </Link>
-
-            <Link
-              href="#fresh"
-              className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
-            >
-              Today's Fresh List
-            </Link>
-
-            <Link
-              href="#baskets"
-              className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
-            >
-              Fresh Baskets
-            </Link>
-
-            {/* IMPORTANT: REAL PAGE LINK */}
-            <Link
-              href="/share-your-harvest"
-              className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
-            >
-              Share Your Harvest
-            </Link>
-
-            <Link
-              href="/about"
-              className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
-            >
-              About Us
-            </Link>
+            {[
+              ["Home", "#home"],
+              ["Today's Fresh List", "#fresh"],
+              ["Fresh Baskets", "#products"],
+              ["Share Your Harvest", "#growers"],
+              ["About Us", "#about"],
+            ].map(([label, href]) => (
+              <Link
+                key={label}
+                href={href}
+                className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
 
           <div className="hidden items-center gap-3 sm:flex">
@@ -274,26 +311,24 @@ export default function Home() {
               asChild
             >
               <Link href="/cart">
-                <ShoppingBag className="h-4 w-4" />
+                <ShoppingBag className="mr-2 h-4 w-4" />
                 Cart
               </Link>
             </Button>
           </div>
 
-          {/* MOBILE MENU BUTTON */}
-
           <button
-            type="button"
-            onClick={() => setMenuOpen((value) => !value)}
+            onClick={() => setMenuOpen(!menuOpen)}
             className="rounded-full p-2 lg:hidden"
-            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-            aria-expanded={menuOpen}
+            aria-label={
+              menuOpen
+                ? "Close navigation"
+                : "Open navigation"
+            }
           >
             {menuOpen ? <X /> : <Menu />}
           </button>
         </div>
-
-        {/* MOBILE NAVIGATION */}
 
         {menuOpen && (
           <motion.div
@@ -308,50 +343,27 @@ export default function Home() {
             className="border-t border-[#dfe5d8] bg-[#f8f7f1] px-5 py-5 lg:hidden"
           >
             <div className="flex flex-col gap-4">
-              <Link
-                href="/"
-                onClick={() => setMenuOpen(false)}
-                className="font-medium"
-              >
-                Home
-              </Link>
-
-              <Link
-                href="#fresh"
-                onClick={() => setMenuOpen(false)}
-                className="font-medium"
-              >
-                Today's Fresh List
-              </Link>
-
-              <Link
-                href="#baskets"
-                onClick={() => setMenuOpen(false)}
-                className="font-medium"
-              >
-                Fresh Baskets
-              </Link>
-
-              <Link
-                href="/share-your-harvest"
-                onClick={() => setMenuOpen(false)}
-                className="font-medium"
-              >
-                Share Your Harvest
-              </Link>
-
-              <Link
-                href="/about"
-                onClick={() => setMenuOpen(false)}
-                className="font-medium"
-              >
-                About Us
-              </Link>
+              {[
+                ["Home", "#home"],
+                ["Today's Fresh List", "#fresh"],
+                ["Fresh Baskets", "#products"],
+                ["Share Your Harvest", "#growers"],
+                ["About Us", "#about"],
+              ].map(([label, href]) => (
+                <Link
+                  key={label}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="font-medium"
+                >
+                  {label}
+                </Link>
+              ))}
 
               <Link
                 href="/cart"
                 onClick={() => setMenuOpen(false)}
-                className="font-medium"
+                className="font-semibold text-[#2d6339]"
               >
                 Cart
               </Link>
@@ -365,7 +377,10 @@ export default function Home() {
         {/* HERO                                                             */}
         {/* ---------------------------------------------------------------- */}
 
-        <section id="home" className="relative">
+        <section
+          id="home"
+          className="relative"
+        >
           <motion.div
             style={{
               y: heroY,
@@ -412,6 +427,7 @@ export default function Home() {
                 <br />
                 Honest farming.
                 <br />
+
                 <span className="text-[#70965b]">
                   A healthier tomorrow.
                 </span>
@@ -432,9 +448,10 @@ export default function Home() {
                 }}
                 className="mt-7 max-w-2xl text-lg leading-8 text-[#61716a]"
               >
-                Amruta Dhaanya connects families with traditional
-                foods sourced directly from growers we know by name —
-                no warehouses, no anonymous sellers, only what&apos;s
+                Amruta Dhaanya connects families with
+                traditional foods sourced directly from
+                growers we know by name — no warehouses,
+                no anonymous sellers, only what&apos;s
                 genuinely available today.
               </motion.p>
 
@@ -452,33 +469,48 @@ export default function Home() {
                 }}
                 className="mt-9 flex flex-col gap-3 sm:flex-row"
               >
-                <Link
-                  href="#products"
-                  className={buttonVariants({
-                    size: "lg",
-                    className:
-                      "rounded-full bg-[#2d6339] px-7 shadow-lg shadow-[#2d6339]/15 hover:bg-[#214e2d]",
-                  })}
+                <Button
+                  size="lg"
+                  className="rounded-full bg-[#2d6339] px-7 shadow-lg shadow-[#2d6339]/15 hover:bg-[#214e2d]"
+                  asChild
                 >
-                  Explore Products
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                  <Link href="#products">
+                    Explore Products
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
 
-                <Link
-                  href="/share-your-harvest"
-                  className={buttonVariants({
-                    variant: "outline",
-                    size: "lg",
-                    className:
-                      "rounded-full border-[#376540] bg-transparent px-7 text-[#2e5b39]",
-                  })}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full border-[#376540] px-7 text-[#2e5b39]"
+                  asChild
                 >
-                  Become a Grower
-                </Link>
+                  <Link href="#growers">
+                    Become a Grower
+                  </Link>
+                </Button>
               </motion.div>
+
+              <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-[#65756a]">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[#47744b]" />
+                  Verified growers
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[#47744b]" />
+                  Checked before listing
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[#47744b]" />
+                  Confirmed before payment
+                </div>
+              </div>
             </div>
 
-            {/* HERO CARD */}
+            {/* HERO VISUAL */}
 
             <motion.div
               initial={{
@@ -590,7 +622,9 @@ export default function Home() {
                         }}
                         className="rounded-2xl bg-white/85 p-4 text-center"
                       >
-                        <div className="text-xl">{icon}</div>
+                        <div className="text-xl">
+                          {icon}
+                        </div>
 
                         <div className="mt-1 text-sm text-[#50665a]">
                           {label}
@@ -605,162 +639,16 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* HARVESTED BY SUN / MOON                                          */}
+        {/* HARVEST MARQUEE                                                  */}
         {/* ---------------------------------------------------------------- */}
 
-        <section className="relative overflow-hidden border-y border-[#dce5d8] bg-[#f3f6ee] py-12">
-          <motion.div
-            animate={{
-              x: ["-30%", "130%"],
-              opacity: [0, 0.35, 0],
-            }}
-            transition={{
-              duration: 9,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="pointer-events-none absolute left-0 top-1/2 h-40 w-96 -translate-y-1/2 rounded-full bg-[#e3b34b] blur-3xl"
-          />
-
-          <motion.div
-            animate={{
-              x: ["130%", "-30%"],
-              opacity: [0, 0.25, 0],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-            className="pointer-events-none absolute right-0 top-1/2 h-40 w-96 -translate-y-1/2 rounded-full bg-[#70965b] blur-3xl"
-          />
-
-          <div className="relative mx-auto flex min-h-[130px] max-w-[1280px] items-center justify-center px-5 lg:px-8">
-            <div className="flex w-full items-center justify-center gap-5 sm:gap-8">
-              <motion.div
-                animate={{
-                  rotate: 360,
-                  scale: [1, 1.08, 1],
-                }}
-                transition={{
-                  rotate: {
-                    duration: 18,
-                    repeat: Infinity,
-                    ease: "linear",
-                  },
-                  scale: {
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                }}
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#e3b34b]/20 text-3xl sm:h-16 sm:w-16 sm:text-4xl"
-              >
-                ☀️
-              </motion.div>
-
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  scale: 0.95,
-                }}
-                whileInView={{
-                  opacity: 1,
-                  scale: 1,
-                }}
-                viewport={{
-                  once: true,
-                }}
-                transition={{
-                  duration: 0.8,
-                }}
-                className="relative min-w-0 text-center"
-              >
-                <motion.div
-                  animate={{
-                    opacity: [1, 0, 0, 1],
-                    y: [0, -5, 8, 0],
-                    scale: [1, 0.96, 1.02, 1],
-                  }}
-                  transition={{
-                    duration: 7,
-                    repeat: Infinity,
-                    times: [0, 0.42, 0.58, 1],
-                    ease: "easeInOut",
-                  }}
-                >
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#78916e] sm:text-xs">
-                    From nature to your home
-                  </div>
-
-                  <h2 className="mt-2 text-xl font-bold tracking-[0.06em] text-[#2e6139] sm:text-2xl md:text-3xl">
-                    HARVESTED BY THE SUN,
-                    <br className="sm:hidden" />
-                    <span className="mx-2 text-[#9a8150]">
-                      BLESSED BY THE MOON
-                    </span>
-                  </h2>
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                animate={{
-                  y: [0, -7, 0],
-                  rotate: [-5, 5, -5],
-                  scale: [1, 1.04, 1],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#dfe5ee] text-3xl sm:h-16 sm:w-16 sm:text-4xl"
-              >
-                🌙
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="pointer-events-none absolute inset-0">
-            {["🌾", "🌿", "🍃", "🌾", "🌿", "🍃"].map(
-              (item, index) => (
-                <motion.span
-                  key={`${item}-${index}`}
-                  initial={{
-                    left: `${index * 18 - 10}%`,
-                    top: index % 2 === 0 ? "15%" : "65%",
-                    opacity: 0,
-                  }}
-                  animate={{
-                    left: ["-5%", "105%"],
-                    top:
-                      index % 2 === 0
-                        ? ["15%", "70%"]
-                        : ["70%", "15%"],
-                    opacity: [0, 0.5, 0],
-                    rotate: [0, 30, -20, 0],
-                  }}
-                  transition={{
-                    duration: 10 + index * 1.5,
-                    repeat: Infinity,
-                    delay: index * 1.2,
-                    ease: "linear",
-                  }}
-                  className="absolute text-xl"
-                >
-                  {item}
-                </motion.span>
-              )
-            )}
-          </div>
-        </section>
+        <HarvestMarquee />
 
         {/* ---------------------------------------------------------------- */}
         {/* TRUST STRIP                                                      */}
         {/* ---------------------------------------------------------------- */}
 
-        <section className="border-y border-[#dce5d8] bg-white/60">
+        <section className="border-b border-[#dce5d8] bg-white/60">
           <div className="mx-auto grid max-w-[1280px] grid-cols-2 divide-x divide-[#dce5d8] px-5 py-7 sm:grid-cols-4 lg:px-8">
             {trustItems.map((item, index) => {
               const Icon = item.icon;
@@ -807,7 +695,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* SEARCH                                                            */}
+        {/* SEARCH                                                           */}
         {/* ---------------------------------------------------------------- */}
 
         <section className="px-5 py-20 lg:px-8">
@@ -838,29 +726,41 @@ export default function Home() {
 
                 <Input
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      openWhatsApp();
-                    }
-                  }}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                   placeholder="Search vegetables, fruits, groceries..."
                   className="h-16 rounded-full border-[#d8e2d3] bg-white pl-14 pr-28 text-base shadow-[0_12px_40px_rgba(38,70,45,.06)]"
                 />
 
                 <Button
-                  onClick={() => openWhatsApp()}
                   className="absolute right-2 top-2 rounded-full bg-[#2d6339] px-6 hover:bg-[#214e2d]"
+                  onClick={() => {
+                    document
+                      .getElementById("products")
+                      ?.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                  }}
                 >
                   Search
                 </Button>
               </div>
+
+              {search && (
+                <p className="mt-4 text-sm text-[#718078]">
+                  Showing fresh products for{" "}
+                  <span className="font-semibold text-[#315b3a]">
+                    &quot;{search}&quot;
+                  </span>
+                </p>
+              )}
             </motion.div>
           </div>
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* CATEGORIES                                                        */}
+        {/* CATEGORIES                                                       */}
         {/* ---------------------------------------------------------------- */}
 
         <section
@@ -892,7 +792,6 @@ export default function Home() {
               {categories.map((category, index) => (
                 <motion.button
                   key={category.name}
-                  type="button"
                   initial={{
                     opacity: 0,
                     y: 20,
@@ -914,15 +813,6 @@ export default function Home() {
                   whileTap={{
                     scale: 0.97,
                   }}
-                  onClick={() => {
-                    setSearch(category.name);
-
-                    document
-                      .getElementById("products")
-                      ?.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                  }}
                   className="group rounded-3xl border border-[#dde6d8] bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-xl hover:shadow-[#345e3c]/10"
                 >
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#edf3e9] text-3xl transition-transform group-hover:scale-110">
@@ -939,7 +829,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* PRODUCTS                                                          */}
+        {/* PRODUCTS                                                         */}
         {/* ---------------------------------------------------------------- */}
 
         <section
@@ -958,19 +848,14 @@ export default function Home() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-[#68786d]">
-                  Traditional foods sourced directly from the growers
-                  and producers we work with.
+                  Traditional foods sourced directly from
+                  the growers and producers we work with.
                 </p>
               </div>
 
               <Button
                 variant="outline"
                 className="w-fit rounded-full border-[#4c7752]"
-                onClick={() =>
-                  openWhatsApp(
-                    "Hello Amruta Dhaanya, I would like to see today's fresh list."
-                  )
-                }
               >
                 View Fresh List
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -980,7 +865,7 @@ export default function Home() {
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {products.map((product, index) => (
                 <motion.div
-                  key={product.name}
+                  key={product.slug}
                   initial={{
                     opacity: 0,
                     y: 35,
@@ -1000,30 +885,36 @@ export default function Home() {
                   }}
                 >
                   <Card className="group overflow-hidden rounded-[28px] border-[#dce6d7] bg-[#fbfcf8] shadow-sm">
-                    <div className="relative flex h-64 items-center justify-center overflow-hidden bg-[#e2eadb]">
-                      <motion.div
-                        whileHover={{
-                          scale: 1.15,
-                          rotate: 5,
-                        }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 200,
-                        }}
-                        className="text-8xl"
-                      >
-                        {product.emoji}
-                      </motion.div>
+                    <Link href={`/products/${product.slug}`}>
+                      <div className="relative flex h-64 items-center justify-center overflow-hidden bg-[#e2eadb]">
+                        <motion.div
+                          whileHover={{
+                            scale: 1.15,
+                            rotate: 5,
+                          }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 200,
+                          }}
+                          className="text-8xl"
+                        >
+                          {product.emoji}
+                        </motion.div>
 
-                      <Badge className="absolute left-5 top-5 rounded-full bg-white/90 text-[#35613e]">
-                        Local harvest
-                      </Badge>
-                    </div>
+                        <Badge className="absolute left-5 top-5 rounded-full bg-white/90 text-[#35613e]">
+                          Local harvest
+                        </Badge>
+                      </div>
+                    </Link>
 
                     <CardContent className="p-7">
-                      <h3 className="text-2xl font-bold">
-                        {product.name}
-                      </h3>
+                      <Link
+                        href={`/products/${product.slug}`}
+                      >
+                        <h3 className="text-2xl font-bold transition-colors hover:text-[#477047]">
+                          {product.name}
+                        </h3>
+                      </Link>
 
                       <p className="mt-3 min-h-[72px] leading-6 text-[#6b796f]">
                         {product.description}
@@ -1042,15 +933,15 @@ export default function Home() {
 
                         <Button
                           size="icon"
-                          className="rounded-full bg-[#2d6339] transition-transform group-hover:scale-110 hover:bg-[#214e2d]"
-                          onClick={() =>
-                            openWhatsApp(
-                              `Hello Amruta Dhaanya, I would like to check availability for ${product.name}.`
-                            )
-                          }
-                          aria-label={`Request ${product.name}`}
+                          className="rounded-full bg-[#2d6339] transition-transform group-hover:scale-110"
+                          asChild
                         >
-                          <ShoppingBag className="h-4 w-4" />
+                          <Link
+                            href={`/products/${product.slug}`}
+                            aria-label={`View ${product.name}`}
+                          >
+                            <ShoppingBag className="h-4 w-4" />
+                          </Link>
                         </Button>
                       </div>
                     </CardContent>
@@ -1062,7 +953,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* PURPOSE                                                           */}
+        {/* PURPOSE                                                          */}
         {/* ---------------------------------------------------------------- */}
 
         <section
@@ -1092,17 +983,19 @@ export default function Home() {
               </h2>
 
               <p className="mt-6 text-lg leading-8 text-[#66756b]">
-                Many local growers face waste, unstable pricing, and
-                limited access to nearby households. Amruta Dhaanya was
-                started to build a more trustworthy and responsible
-                local fresh-food network for both growers and families.
+                Many local growers face waste, unstable
+                pricing, and limited access to nearby
+                households. Amruta Dhaanya was started to
+                build a more trustworthy and responsible
+                local fresh-food network for both growers
+                and families.
               </p>
 
               <Button
-                className="mt-8 rounded-full bg-[#2d6339] hover:bg-[#214e2d]"
+                className="mt-8 rounded-full bg-[#2d6339]"
                 asChild
               >
-                <Link href="/about">
+                <Link href="#about">
                   About Us
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -1137,9 +1030,9 @@ export default function Home() {
                 </h3>
 
                 <p className="mt-6 leading-7 text-[#c8d9c4]">
-                  A community of growers, local agents and families
-                  participating in one transparent, trust-based
-                  marketplace.
+                  A community of growers, local agents and
+                  families participating in one transparent,
+                  trust-based marketplace.
                 </p>
 
                 <div className="mt-10 grid grid-cols-3 gap-3">
@@ -1152,7 +1045,9 @@ export default function Home() {
                       key={title}
                       className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm"
                     >
-                      <div className="font-bold">{title}</div>
+                      <div className="font-bold">
+                        {title}
+                      </div>
 
                       <div className="mt-1 text-xs text-[#b8d3ad]">
                         {subtitle}
@@ -1166,7 +1061,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* HONESTY                                                           */}
+        {/* HONESTY                                                          */}
         {/* ---------------------------------------------------------------- */}
 
         <section className="bg-[#f0f4ec] px-5 py-24 lg:px-8">
@@ -1177,16 +1072,18 @@ export default function Home() {
               </p>
 
               <h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-                Real availability. Private sellers. Nothing promised
-                until it&apos;s confirmed.
+                Real availability. Private sellers. Nothing
+                promised until it&apos;s confirmed.
               </h2>
 
               <p className="mt-5 text-lg leading-8 text-[#66756b]">
-                We don&apos;t stock a warehouse and we don&apos;t
-                promise everything, every day. Every item comes from a
-                registered local seller, is checked for basic freshness
-                before it&apos;s listed, and is confirmed with you
-                before anything is processed or paid for.
+                We don&apos;t stock a warehouse and we
+                don&apos;t promise everything, every day.
+                Every item comes from a registered local
+                seller, is checked for basic freshness
+                before it&apos;s listed, and is confirmed
+                with you before anything is processed or
+                paid for.
               </p>
             </div>
 
@@ -1240,7 +1137,9 @@ export default function Home() {
                     </span>
 
                     <div>
-                      <h3 className="text-xl font-bold">{title}</h3>
+                      <h3 className="text-xl font-bold">
+                        {title}
+                      </h3>
 
                       <p className="mt-3 leading-7 text-[#6b786f]">
                         {text}
@@ -1257,10 +1156,7 @@ export default function Home() {
         {/* HOW IT WORKS                                                     */}
         {/* ---------------------------------------------------------------- */}
 
-        <section
-          id="baskets"
-          className="px-5 py-28 lg:px-8"
-        >
+        <section className="px-5 py-28 lg:px-8">
           <div className="mx-auto max-w-[1280px]">
             <div className="text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#70915f]">
@@ -1337,7 +1233,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* DELIVERY                                                          */}
+        {/* DELIVERY                                                         */}
         {/* ---------------------------------------------------------------- */}
 
         <section className="px-5 pb-28 lg:px-8">
@@ -1359,30 +1255,26 @@ export default function Home() {
                   </h2>
 
                   <p className="mt-5 leading-7 text-[#617268]">
-                    We are currently testing delivery and pickup support
-                    in selected areas of Warangal, Hanamkonda, Kazipet
-                    and nearby local communities.
+                    We are currently testing delivery and
+                    pickup support in selected areas of
+                    Warangal, Hanamkonda, Kazipet and
+                    nearby local communities.
                   </p>
 
                   <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                     <Input
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
                       placeholder="Enter your area or pincode"
                       className="h-12 rounded-full border-white bg-white"
                     />
 
-                    <Button
-                      onClick={() => openWhatsApp()}
-                      className="h-12 shrink-0 rounded-full bg-[#2d6339] px-6 hover:bg-[#214e2d]"
-                    >
+                    <Button className="h-12 shrink-0 rounded-full bg-[#2d6339] px-6 hover:bg-[#214e2d]">
                       Check on WhatsApp
                     </Button>
                   </div>
 
                   <p className="mt-3 text-xs text-[#748279]">
-                    We&apos;ll open WhatsApp with your area filled in —
-                    just hit send.
+                    We&apos;ll open WhatsApp with your area
+                    filled in — just hit send.
                   </p>
                 </div>
 
@@ -1401,7 +1293,9 @@ export default function Home() {
 
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-8xl">📍</div>
+                      <div className="text-8xl">
+                        📍
+                      </div>
 
                       <div className="mt-4 text-2xl font-bold text-[#345e3c]">
                         Warangal
@@ -1437,28 +1331,26 @@ export default function Home() {
               </h2>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[#c9d9c5]">
-                Many homes, terrace gardens, backyard growers and local
-                growing families may have limited but useful harvests.
-                Amruta Dhaanya creates a simple path for genuine local
+                Many homes, terrace gardens, backyard
+                growers and local growing families may have
+                limited but useful harvests. Amruta Dhaanya
+                creates a simple path for genuine local
                 supply to reach nearby households.
               </p>
 
-              {/* IMPORTANT: REAL PAGE LINK */}
               <Button
                 size="lg"
                 className="mt-8 rounded-full bg-white px-7 text-[#234f32] hover:bg-[#edf4e9]"
-                asChild
               >
-                <Link href="/share-your-harvest">
-                  Register as a Grower
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                Register as a Grower
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
 
             <motion.div
               animate={{
                 y: [0, -12, 0],
+                rotate: [0, 3, -3, 0],
               }}
               transition={{
                 duration: 4,
@@ -1472,7 +1364,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* FAQ                                                               */}
+        {/* FAQ                                                              */}
         {/* ---------------------------------------------------------------- */}
 
         <section
@@ -1490,8 +1382,8 @@ export default function Home() {
               </h2>
 
               <p className="mt-4 text-[#6c796f]">
-                Everything you need to know about ordering from Amruta
-                Dhaanya.
+                Everything you need to know about ordering
+                from Amruta Dhaanya.
               </p>
             </div>
 
@@ -1545,53 +1437,67 @@ export default function Home() {
               </div>
 
               <p className="mt-6 max-w-lg leading-7 text-[#b7c4b9]">
-                Fresh, traditional food sourced directly from growers —
-                selected carefully, handled honestly and shared through
-                a trusted local network.
+                Fresh, traditional food sourced directly
+                from growers — selected carefully, handled
+                honestly and shared through a trusted local
+                network.
               </p>
 
               <div className="mt-7 space-y-2 text-sm text-[#b7c4b9]">
-                <div>Phone: +91 9177751088</div>
-                <div>Email: amrutadhaanya@gmail.com</div>
                 <div>
-                  Location: Vangapahad, Warangal, Telangana 506006
+                  Phone: +91 9177751088
+                </div>
+
+                <div>
+                  Email: amrutadhaanya@gmail.com
+                </div>
+
+                <div>
+                  Location: Vangapahad, Warangal,
+                  Telangana 506006
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold">Explore</h3>
+              <h3 className="font-semibold">
+                Explore
+              </h3>
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#b7c4b9]">
-                <Link href="/">Home</Link>
+                <Link href="#home">
+                  Home
+                </Link>
 
                 <Link href="#fresh">
                   Today&apos;s Fresh List
                 </Link>
 
-                <Link href="#baskets">
+                <Link href="#products">
                   Fresh Baskets
                 </Link>
 
-                <Link href="/share-your-harvest">
+                <Link href="#growers">
                   Share Your Harvest
                 </Link>
 
-                <Link href="/about">
+                <Link href="#about">
                   About Us
                 </Link>
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold">Trust</h3>
+              <h3 className="font-semibold">
+                Trust
+              </h3>
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#b7c4b9]">
-                <Link href="/about">
+                <Link href="#about">
                   Our Purpose
                 </Link>
 
-                <Link href="/share-your-harvest">
+                <Link href="#growers">
                   Become a Grower
                 </Link>
 
@@ -1599,20 +1505,16 @@ export default function Home() {
                   FAQs
                 </Link>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    openWhatsApp(
-                      "Hello Amruta Dhaanya, I would like to contact you."
-                    )
-                  }
-                  className="text-left transition-colors hover:text-white"
-                >
+                <Link href="#home">
                   Contact Us
-                </button>
+                </Link>
 
-                <Link href="/about">
+                <Link href="#home">
                   Legal & Policies
+                </Link>
+
+                <Link href="/cart">
+                  Cart
                 </Link>
               </div>
             </div>
@@ -1625,8 +1527,8 @@ export default function Home() {
               </div>
 
               <div>
-                A trusted local harvest network built around real daily
-                availability and community care.
+                A trusted local harvest network built around
+                real daily availability and community care.
               </div>
             </div>
           </div>
