@@ -41,7 +41,7 @@ Approximate Quantity: ${quantity}
 Additional Details: ${description || "Not provided"}
 
 Please let me know the next steps for becoming a grower partner.
-    `.trim();
+`.trim();
 
     window.open(
       `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
@@ -52,7 +52,7 @@ Please let me know the next steps for becoming a grower partner.
   };
 
   return (
-    <main className="min-h-screen bg-[#f8f7f1] text-[#25352a]">
+    <>
       {/* ---------------------------------------------------------------- */}
       {/* TOP BAR                                                          */}
       {/* ---------------------------------------------------------------- */}
@@ -83,13 +83,23 @@ Please let me know the next steps for becoming a grower partner.
             </div>
           </Link>
 
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-[#376540] px-5 py-2.5 text-sm font-semibold text-[#2e5b39] transition hover:bg-[#e9f0e5]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/share-your-harvest/join-as-a-grower"
+              className="hidden items-center gap-2 rounded-full bg-[#2d6339] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#214e2d] sm:inline-flex"
+            >
+              <Sprout className="h-4 w-4" />
+              Join as a Grower
+            </Link>
+
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-full border border-[#376540] px-5 py-2.5 text-sm font-semibold text-[#2e5b39] transition hover:bg-[#e9f0e5]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -122,6 +132,26 @@ Please let me know the next steps for becoming a grower partner.
               have. We&apos;ll understand your harvest and help connect
               it with nearby families.
             </p>
+
+            {/* HERO ACTIONS */}
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/share-your-harvest/join-as-a-grower"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2d6339] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2d6339]/15 transition hover:bg-[#214e2d]"
+              >
+                <Sprout className="h-4 w-4" />
+                Join as a Grower
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <a
+                href="#share-form"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#376540] bg-white/60 px-7 py-3.5 text-sm font-semibold text-[#2e5b39] transition hover:bg-white"
+              >
+                Share Today&apos;s Harvest
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -204,6 +234,36 @@ Please let me know the next steps for becoming a grower partner.
               </div>
             </div>
 
+            {/* JOIN AS GROWER CARD */}
+
+            <div className="mt-8 rounded-3xl border border-[#cddfc7] bg-[#eef5ea] p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#35633d] shadow-sm">
+                  <Sprout className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-[#2e5b39]">
+                    Want to become a registered grower?
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-[#68776d]">
+                    Complete our grower registration form. Your information
+                    will be reviewed by our team before you are accepted as
+                    a grower partner.
+                  </p>
+
+                  <Link
+                    href="/share-your-harvest/join-as-a-grower"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#35633d] hover:underline"
+                  >
+                    Join as a Grower
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
             {/* Contact */}
 
             <div className="mt-8 rounded-3xl bg-[#234f32] p-6 text-white">
@@ -230,7 +290,10 @@ Please let me know the next steps for becoming a grower partner.
           {/* FORM                                                             */}
           {/* ---------------------------------------------------------------- */}
 
-          <div className="rounded-[32px] border border-[#dce5d8] bg-white p-6 shadow-[0_20px_70px_rgba(38,70,45,.08)] sm:p-9">
+          <div
+            id="share-form"
+            className="rounded-[32px] border border-[#dce5d8] bg-white p-6 shadow-[0_20px_70px_rgba(38,70,45,.08)] sm:p-9"
+          >
             {!submitted ? (
               <>
                 <div>
@@ -460,7 +523,7 @@ Please let me know the next steps for becoming a grower partner.
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      {/* BOTTOM CTA                                                       */}
+      {/* GROWER REGISTRATION CTA                                          */}
       {/* ---------------------------------------------------------------- */}
 
       <section className="border-t border-[#dce5d8] bg-[#f0f4ec] px-5 py-20 lg:px-8">
@@ -470,22 +533,32 @@ Please let me know the next steps for becoming a grower partner.
           </div>
 
           <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
-            Small harvest. Real value.
+            Ready to become a registered grower?
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-7 text-[#68776d]">
-            Amruta Dhaanya is building a local network where growers
-            and families can benefit from honest availability and
-            responsible sourcing.
+            If you would like to participate regularly as a grower partner,
+            complete our grower registration form. Our team will review your
+            information and contact you for confirmation.
           </p>
 
-          <Link
-            href="/"
-            className="mt-7 inline-flex items-center gap-2 rounded-full border border-[#376540] px-6 py-3 text-sm font-semibold text-[#2e5b39] transition hover:bg-white"
-          >
-            Explore Amruta Dhaanya
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href="/share-your-harvest/join-as-a-grower"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2d6339] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2d6339]/10 transition hover:bg-[#214e2d]"
+            >
+              Join as a Grower
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-[#376540] px-6 py-3.5 text-sm font-semibold text-[#2e5b39] transition hover:bg-white"
+            >
+              Explore Amruta Dhaanya
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -493,21 +566,129 @@ Please let me know the next steps for becoming a grower partner.
       {/* FOOTER                                                           */}
       {/* ---------------------------------------------------------------- */}
 
-      <footer className="bg-[#172c1d] px-5 py-10 text-white lg:px-8">
-        <div className="mx-auto flex max-w-[1180px] flex-col justify-between gap-5 text-sm sm:flex-row sm:items-center">
-          <div>
-            <div className="font-semibold">Amruta Dhaanya</div>
+      <footer className="bg-[#172c1d] px-5 py-12 text-white lg:px-8">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="grid gap-10 md:grid-cols-3">
+            {/* BRAND */}
 
-            <div className="mt-1 text-[#899a8d]">
-              An Ahaar Kutumbam Initiative
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2d6339] text-2xl">
+                  🌱
+                </div>
+
+                <div>
+                  <div className="font-semibold">
+                    Amruta Dhaanya
+                  </div>
+
+                  <div className="text-[9px] uppercase tracking-[0.2em] text-[#899a8d]">
+                    An Ahaar Kutumbam Initiative
+                  </div>
+                </div>
+              </div>
+
+              <p className="mt-5 max-w-md text-sm leading-6 text-[#b7c4b9]">
+                Fresh, traditional food sourced directly from growers —
+                selected carefully, handled honestly and shared through
+                a trusted local network.
+              </p>
+            </div>
+
+            {/* GROWER */}
+
+            <div>
+              <h3 className="font-semibold">
+                Grow with us
+              </h3>
+
+              <div className="mt-5 flex flex-col gap-3 text-sm">
+                <Link
+                  href="/share-your-harvest/join-as-a-grower"
+                  className="flex items-center gap-2 text-[#c8ddc2] transition hover:text-white"
+                >
+                  <Sprout className="h-4 w-4" />
+                  Join as a Grower
+                </Link>
+
+                <Link
+                  href="/share-your-harvest"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  Share Your Harvest
+                </Link>
+
+                <a
+                  href="tel:+919177751088"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  +91 9177751088
+                </a>
+              </div>
+            </div>
+
+            {/* NAVIGATION */}
+
+            <div>
+              <h3 className="font-semibold">
+                Explore
+              </h3>
+
+              <div className="mt-5 flex flex-col gap-3 text-sm">
+                <Link
+                  href="/"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  Home
+                </Link>
+
+                <Link
+                  href="/about"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  About Us
+                </Link>
+
+                <Link
+                  href="/participate"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  Participate
+                </Link>
+
+                <Link
+                  href="/contact-us"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  Contact Us
+                </Link>
+
+                <Link
+                  href="/legal"
+                  className="text-[#b7c4b9] transition hover:text-white"
+                >
+                  Legal &amp; Policies
+                </Link>
+              </div>
             </div>
           </div>
 
-          <div className="text-[#899a8d]">
-            © 2026 Amruta Dhaanya. All rights reserved.
+          {/* COPYRIGHT */}
+
+          <div className="mt-10 border-t border-white/10 pt-6 text-sm text-[#899a8d]">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row">
+              <div>
+                © 2026 Amruta Dhaanya. All rights reserved.
+              </div>
+
+              <div>
+                A trusted local harvest network built around real
+                daily availability and community care.
+              </div>
+            </div>
           </div>
         </div>
       </footer>
-    </main>
+    </>
   );
 }

@@ -24,11 +24,11 @@ import {
   MapPin,
   Menu,
   Search,
-  ShieldCheck,
   ShoppingBag,
   Sprout,
   Truck,
   X,
+  ShieldCheck,
 } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
@@ -164,7 +164,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f8f7f1] text-[#25352a]">
+    <>
       {/* ------------------------------------------------------------------ */}
       {/* ACCESSIBILITY                                                       */}
       {/* ------------------------------------------------------------------ */}
@@ -245,7 +245,6 @@ export default function Home() {
               Fresh Baskets
             </Link>
 
-            {/* IMPORTANT: REAL PAGE LINK */}
             <Link
               href="/share-your-harvest"
               className="text-sm font-medium text-[#344b3a] transition-colors hover:text-[#477d45]"
@@ -434,7 +433,7 @@ export default function Home() {
               >
                 Amruta Dhaanya connects families with traditional
                 foods sourced directly from growers we know by name —
-                no warehouses, no anonymous sellers, only what&apos;s
+                no warehouses, no anonymous sellers, only what's
                 genuinely available today.
               </motion.p>
 
@@ -512,7 +511,7 @@ export default function Home() {
                 <div className="relative min-h-[430px] overflow-hidden rounded-[30px] bg-[#d8e5cf] p-7">
                   <div className="flex items-center justify-between">
                     <Badge className="rounded-full bg-white/90 px-4 py-2 text-[#35613e]">
-                      Today&apos;s harvest
+                      Today's harvest
                     </Badge>
 
                     <motion.div
@@ -838,7 +837,9 @@ export default function Home() {
 
                 <Input
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) =>
+                    setSearch(event.target.value)
+                  }
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       openWhatsApp();
@@ -958,8 +959,8 @@ export default function Home() {
                 </h2>
 
                 <p className="mt-3 max-w-2xl text-[#68786d]">
-                  Traditional foods sourced directly from the growers
-                  and producers we work with.
+                  Traditional foods sourced directly from the
+                  growers and producers we work with.
                 </p>
               </div>
 
@@ -1088,14 +1089,16 @@ export default function Home() {
               </Badge>
 
               <h2 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
-                A better way for local harvests to reach nearby homes.
+                A better way for local harvests to reach nearby
+                homes.
               </h2>
 
               <p className="mt-6 text-lg leading-8 text-[#66756b]">
-                Many local growers face waste, unstable pricing, and
-                limited access to nearby households. Amruta Dhaanya was
-                started to build a more trustworthy and responsible
-                local fresh-food network for both growers and families.
+                Many local growers face waste, unstable pricing,
+                and limited access to nearby households. Amruta
+                Dhaanya was started to build a more trustworthy and
+                responsible local fresh-food network for both
+                growers and families.
               </p>
 
               <Button
@@ -1178,15 +1181,15 @@ export default function Home() {
 
               <h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
                 Real availability. Private sellers. Nothing promised
-                until it&apos;s confirmed.
+                until it's confirmed.
               </h2>
 
               <p className="mt-5 text-lg leading-8 text-[#66756b]">
-                We don&apos;t stock a warehouse and we don&apos;t
-                promise everything, every day. Every item comes from a
-                registered local seller, is checked for basic freshness
-                before it&apos;s listed, and is confirmed with you
-                before anything is processed or paid for.
+                We don't stock a warehouse and we don't promise
+                everything, every day. Every item comes from a
+                registered local seller, is checked for basic
+                freshness before it's listed, and is confirmed with
+                you before anything is processed or paid for.
               </p>
             </div>
 
@@ -1240,7 +1243,9 @@ export default function Home() {
                     </span>
 
                     <div>
-                      <h3 className="text-xl font-bold">{title}</h3>
+                      <h3 className="text-xl font-bold">
+                        {title}
+                      </h3>
 
                       <p className="mt-3 leading-7 text-[#6b786f]">
                         {text}
@@ -1359,15 +1364,17 @@ export default function Home() {
                   </h2>
 
                   <p className="mt-5 leading-7 text-[#617268]">
-                    We are currently testing delivery and pickup support
-                    in selected areas of Warangal, Hanamkonda, Kazipet
-                    and nearby local communities.
+                    We are currently testing delivery and pickup
+                    support in selected areas of Warangal, Hanamkonda,
+                    Kazipet and nearby local communities.
                   </p>
 
                   <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                     <Input
                       value={search}
-                      onChange={(event) => setSearch(event.target.value)}
+                      onChange={(event) =>
+                        setSearch(event.target.value)
+                      }
                       placeholder="Enter your area or pincode"
                       className="h-12 rounded-full border-white bg-white"
                     />
@@ -1381,7 +1388,7 @@ export default function Home() {
                   </div>
 
                   <p className="mt-3 text-xs text-[#748279]">
-                    We&apos;ll open WhatsApp with your area filled in —
+                    We'll open WhatsApp with your area filled in —
                     just hit send.
                   </p>
                 </div>
@@ -1437,13 +1444,12 @@ export default function Home() {
               </h2>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[#c9d9c5]">
-                Many homes, terrace gardens, backyard growers and local
-                growing families may have limited but useful harvests.
-                Amruta Dhaanya creates a simple path for genuine local
-                supply to reach nearby households.
+                Many homes, terrace gardens, backyard growers and
+                local growing families may have limited but useful
+                harvests. Amruta Dhaanya creates a simple path for
+                genuine local supply to reach nearby households.
               </p>
 
-              {/* IMPORTANT: REAL PAGE LINK */}
               <Button
                 size="lg"
                 className="mt-8 rounded-full bg-white px-7 text-[#234f32] hover:bg-[#edf4e9]"
@@ -1490,8 +1496,8 @@ export default function Home() {
               </h2>
 
               <p className="mt-4 text-[#6c796f]">
-                Everything you need to know about ordering from Amruta
-                Dhaanya.
+                Everything you need to know about ordering from
+                Amruta Dhaanya.
               </p>
             </div>
 
@@ -1527,6 +1533,8 @@ export default function Home() {
       <footer className="bg-[#172c1d] px-5 py-16 text-white lg:px-8">
         <div className="mx-auto max-w-[1280px]">
           <div className="grid gap-12 lg:grid-cols-[1.4fr_.7fr_.7fr]">
+
+            {/* BRAND */}
             <div>
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2d6339] text-2xl">
@@ -1559,65 +1567,104 @@ export default function Home() {
               </div>
             </div>
 
+            {/* EXPLORE */}
             <div>
-              <h3 className="font-semibold">Explore</h3>
+              <h3 className="font-semibold">
+                Explore
+              </h3>
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#b7c4b9]">
-                <Link href="/">Home</Link>
-
-                <Link href="#fresh">
-                  Today&apos;s Fresh List
+                <Link
+                  href="/"
+                  className="transition-colors hover:text-white"
+                >
+                  Home
                 </Link>
 
-                <Link href="#baskets">
+                <Link
+                  href="#fresh"
+                  className="transition-colors hover:text-white"
+                >
+                  Today's Fresh List
+                </Link>
+
+                <Link
+                  href="#baskets"
+                  className="transition-colors hover:text-white"
+                >
                   Fresh Baskets
                 </Link>
 
-                <Link href="/share-your-harvest">
+                <Link
+                  href="/share-your-harvest"
+                  className="transition-colors hover:text-white"
+                >
                   Share Your Harvest
                 </Link>
 
-                <Link href="/about">
+                <Link
+                  href="/about"
+                  className="transition-colors hover:text-white"
+                >
                   About Us
                 </Link>
               </div>
             </div>
 
+            {/* TRUST */}
             <div>
-              <h3 className="font-semibold">Trust</h3>
+              <h3 className="font-semibold">
+                Trust
+              </h3>
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#b7c4b9]">
-                <Link href="/about">
-                  Our Purpose
-                </Link>
 
-                <Link href="/share-your-harvest">
+                {/* BECOME A GROWER */}
+                <Link
+                  href="/share-your-harvest"
+                  className="transition-colors hover:text-white"
+                >
                   Become a Grower
                 </Link>
 
-                <Link href="#faq">
+                {/* PARTICIPATE - DIRECT PAGE */}
+               < Link
+               href="/Participate"
+              className="transition-colors hover:text-white"
+               >
+              Participate
+              </Link>
+
+                {/* FAQ */}
+                <Link
+                  href="#faq"
+                  className="transition-colors hover:text-white"
+                >
                   FAQs
                 </Link>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    openWhatsApp(
-                      "Hello Amruta Dhaanya, I would like to contact you."
-                    )
-                  }
-                  className="text-left transition-colors hover:text-white"
+                {/* CONTACT US */}
+                <Link
+                  href="/contact-us"
+                  className="transition-colors hover:text-white"
                 >
                   Contact Us
-                </button>
-
-                <Link href="/about">
-                  Legal & Policies
                 </Link>
+
+                {/* LEGAL */}
+                <Link
+                 href="/legal"
+                 className="transition-colors hover:text-white"
+                >
+                 Legal & Policies
+                </Link>
+
               </div>
             </div>
+
           </div>
 
+          {/* COPYRIGHT */}
           <div className="mt-14 border-t border-white/10 pt-7 text-sm text-[#899a8d]">
             <div className="flex flex-col justify-between gap-3 sm:flex-row">
               <div>
@@ -1625,13 +1672,13 @@ export default function Home() {
               </div>
 
               <div>
-                A trusted local harvest network built around real daily
-                availability and community care.
+                A trusted local harvest network built around real
+                daily availability and community care.
               </div>
             </div>
           </div>
         </div>
       </footer>
-    </main>
+    </>
   );
 }
