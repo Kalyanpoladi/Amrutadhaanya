@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -14,7 +14,6 @@ import {
   ShoppingBag,
   Sprout,
   Truck,
-  Users,
   X,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
@@ -29,6 +28,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+import { createClient } from "@/lib/supabase/client";
 
 /* -------------------------------------------------------------------------- */
 /* DATA                                                                       */
@@ -106,7 +107,8 @@ const faqs = [
       "Ahaar Kutumbam is the wider community initiative connecting growers, local agents and families. Amruta Dhaanya is the customer-facing marketplace built within that initiative.",
   },
   {
-    question: "How do I know the products are genuinely traditional?",
+    question:
+      "How do I know the products are genuinely traditional?",
     answer:
       "We work with registered local growers and sellers, check products before listing and confirm actual availability before an order is processed.",
   },
@@ -145,10 +147,7 @@ function HarvestMarquee() {
   ];
 
   return (
-    <section
-      aria-label="Amruta Dhaanya philosophy"
-      className="relative overflow-hidden border-y border-[#d9e4d4] bg-[#edf3e9] py-5"
-    >
+    <section className="relative overflow-hidden border-y border-[#dce5d8] bg-[#f4f7f0] py-4">
       <motion.div
         animate={{
           x: ["-10%", "110%"],
@@ -190,7 +189,7 @@ function HarvestMarquee() {
                 ✦
               </span>
             </div>
-          ))
+          )),
         )}
       </motion.div>
     </section>
@@ -204,25 +203,74 @@ function HarvestMarquee() {
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [user, setUser] = useState<any>(null);
 
   const { scrollYProgress } = useScroll();
 
-  const heroY = useTransform(
-    scrollYProgress,
-    [0, 0.3],
-    [0, 80]
-  );
+  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 80]);
 
   const heroOpacity = useTransform(
     scrollYProgress,
     [0, 0.25],
-    [1, 0.7]
+    [1, 0.7],
   );
 
+  /* ------------------------------------------------------------------------ */
+  /* SUPABASE SESSION                                                         */
+  /* ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    let mounted = true;
+
+    const loadUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (mounted) {
+        setUser(user);
+      }
+    };
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setUser(session?.user ?? null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  /* ------------------------------------------------------------------------ */
+  /* LOGOUT                                                                   */
+  /* ------------------------------------------------------------------------ */
+
+  async function handleLogout() {
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("Logout error:", error);
+      return;
+    }
+
+    setUser(null);
+  }
+
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f8f7f1] text-[#24352a]">
+    <main className="min-h-screen bg-[#f8f7f1] text-[#213326]">
       {/* ------------------------------------------------------------------ */}
-      {/* ACCESSIBILITY SKIP LINKS                                           */}
+      {/* ACCESSIBILITY SKIP LINK                                            */}
       {/* ------------------------------------------------------------------ */}
 
       <div className="sr-only focus-within:not-sr-only">
@@ -235,7 +283,7 @@ export default function Home() {
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* ANNOUNCEMENT                                                       */}
+      {/* ANNOUNCEMENT                                                        */}
       {/* ------------------------------------------------------------------ */}
 
       <motion.div
@@ -247,7 +295,7 @@ export default function Home() {
       </motion.div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* NAVBAR                                                             */}
+      {/* NAVBAR                                                              */}
       {/* ------------------------------------------------------------------ */}
 
       <header className="sticky top-0 z-50 border-b border-[#dfe5d8]/80 bg-[#f8f7f1]/90 backdrop-blur-xl">
@@ -298,13 +346,40 @@ export default function Home() {
             ))}
           </nav>
 
+          {/* DESKTOP AUTH + CART */}
+
           <div className="hidden items-center gap-3 sm:flex">
-            <Button
-              variant="outline"
-              className="rounded-full border-[#376540] bg-transparent px-6 text-[#2e5b39] hover:bg-[#e9f0e5]"
-            >
-              Login
-            </Button>
+            {user ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="rounded-full border-[#376540] bg-transparent px-6 text-[#2e5b39] hover:bg-[#e9f0e5]"
+                  asChild
+                >
+                  <Link href="/account">
+                    Account
+                  </Link>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="rounded-full px-4 text-[#5c6d61] hover:bg-[#e9f0e5]"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                className="rounded-full border-[#376540] bg-transparent px-6 text-[#2e5b39] hover:bg-[#e9f0e5]"
+                asChild
+              >
+                <Link href="/login">
+                  Login
+                </Link>
+              </Button>
+            )}
 
             <Button
               className="rounded-full bg-[#2d6339] px-6 shadow-lg shadow-[#244d2f]/10 hover:bg-[#214e2d]"
@@ -317,18 +392,24 @@ export default function Home() {
             </Button>
           </div>
 
+          {/* MOBILE MENU BUTTON */}
+
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            type="button"
+            onClick={() => setMenuOpen((value) => !value)}
             className="rounded-full p-2 lg:hidden"
             aria-label={
               menuOpen
                 ? "Close navigation"
                 : "Open navigation"
             }
+            aria-expanded={menuOpen}
           >
             {menuOpen ? <X /> : <Menu />}
           </button>
         </div>
+
+        {/* MOBILE NAVIGATION */}
 
         {menuOpen && (
           <motion.div
@@ -359,6 +440,37 @@ export default function Home() {
                   {label}
                 </Link>
               ))}
+
+              {user ? (
+                <>
+                  <Link
+                    href="/account"
+                    onClick={() => setMenuOpen(false)}
+                    className="font-semibold text-[#2d6339]"
+                  >
+                    Account
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="text-left font-medium text-[#65756a]"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="font-semibold text-[#2d6339]"
+                >
+                  Login
+                </Link>
+              )}
 
               <Link
                 href="/cart"
@@ -451,7 +563,7 @@ export default function Home() {
                 Amruta Dhaanya connects families with
                 traditional foods sourced directly from
                 growers we know by name — no warehouses,
-                no anonymous sellers, only what&apos;s
+                no anonymous sellers, only what's
                 genuinely available today.
               </motion.p>
 
@@ -544,7 +656,7 @@ export default function Home() {
                 <div className="relative min-h-[430px] overflow-hidden rounded-[30px] bg-[#d8e5cf] p-7">
                   <div className="flex items-center justify-between">
                     <Badge className="rounded-full bg-white/90 px-4 py-2 text-[#35613e]">
-                      Today&apos;s harvest
+                      Today's harvest
                     </Badge>
 
                     <motion.div
@@ -1073,15 +1185,15 @@ export default function Home() {
 
               <h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
                 Real availability. Private sellers. Nothing
-                promised until it&apos;s confirmed.
+                promised until it's confirmed.
               </h2>
 
               <p className="mt-5 text-lg leading-8 text-[#66756b]">
-                We don&apos;t stock a warehouse and we
-                don&apos;t promise everything, every day.
+                We don't stock a warehouse and we
+                don't promise everything, every day.
                 Every item comes from a registered local
                 seller, is checked for basic freshness
-                before it&apos;s listed, and is confirmed
+                before it's listed, and is confirmed
                 with you before anything is processed or
                 paid for.
               </p>
@@ -1273,7 +1385,7 @@ export default function Home() {
                   </div>
 
                   <p className="mt-3 text-xs text-[#748279]">
-                    We&apos;ll open WhatsApp with your area
+                    We'll open WhatsApp with your area
                     filled in — just hit send.
                   </p>
                 </div>
@@ -1470,7 +1582,7 @@ export default function Home() {
                 </Link>
 
                 <Link href="#fresh">
-                  Today&apos;s Fresh List
+                  Today's Fresh List
                 </Link>
 
                 <Link href="#products">
