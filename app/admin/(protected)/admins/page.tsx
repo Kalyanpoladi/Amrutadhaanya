@@ -18,6 +18,11 @@ export default function AdminManagementPage() {
 
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(
+    null,
+  );
+  const [resettingPassword, setResettingPassword] =
+    useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -30,6 +35,17 @@ export default function AdminManagementPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+
+  // --------------------------------------------------
+  // RESET PASSWORD FORM
+  // --------------------------------------------------
+
+  const [resetAdmin, setResetAdmin] =
+    useState<AdminAccount | null>(null);
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
 
   // --------------------------------------------------
   // LOAD ADMINISTRATORS
@@ -56,7 +72,10 @@ export default function AdminManagementPage() {
 
       setAdmins(data.admins ?? []);
     } catch (err) {
-      console.error("Load administrators error:", err);
+      console.error(
+        "Load administrators error:",
+        err,
+      );
 
       setError(
         err instanceof Error
@@ -117,19 +136,13 @@ export default function AdminManagementPage() {
         } was created successfully.`,
       );
 
-      // --------------------------------------------------
-      // CLEAR FORM AFTER SUCCESS
-      // --------------------------------------------------
-
+      // Clear form
       setFullName("");
       setEmail("");
       setPhone("");
       setPassword("");
 
-      // --------------------------------------------------
-      // REFRESH ADMIN LIST
-      // --------------------------------------------------
-
+      // Refresh administrator list
       await loadAdmins();
     } catch (err) {
       console.error(
@@ -149,6 +162,17 @@ export default function AdminManagementPage() {
 
   // --------------------------------------------------
   // ACTIVATE / DEACTIVATE ADMINISTRATOR
+  //
+  // PATCH API:
+  //
+  // POST /api/admin/admins
+  //
+  // Body:
+  //
+  // {
+  //   id: "...",
+  //   isActive: true/false
+  // }
   // --------------------------------------------------
 
   async function handleToggleAdmin(
@@ -156,18 +180,20 @@ export default function AdminManagementPage() {
   ) {
     setError("");
     setSuccess("");
+    setUpdatingId(admin.id);
 
     const nextStatus = !admin.is_active;
 
     try {
       const response = await fetch(
-        `/api/admin/admins/${admin.id}`,
+        "/api/admin/admins",
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            id: admin.id,
             isActive: nextStatus,
           }),
         },
@@ -202,6 +228,125 @@ export default function AdminManagementPage() {
           ? err.message
           : "Unable to update administrator status.",
       );
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  // --------------------------------------------------
+  // OPEN RESET PASSWORD FORM
+  // --------------------------------------------------
+
+  function openResetPassword(
+    admin: AdminAccount,
+  ) {
+    setError("");
+    setSuccess("");
+
+    setNewPassword("");
+    setConfirmPassword("");
+
+    setResetAdmin(admin);
+  }
+
+  // --------------------------------------------------
+  // CLOSE RESET PASSWORD FORM
+  // --------------------------------------------------
+
+  function closeResetPassword() {
+    if (resettingPassword) {
+      return;
+    }
+
+    setResetAdmin(null);
+    setNewPassword("");
+    setConfirmPassword("");
+  }
+
+  // --------------------------------------------------
+  // RESET ADMINISTRATOR PASSWORD
+  //
+  // API expects:
+  //
+  // {
+  //   authUserId: "...",
+  //   newPassword: "..."
+  // }
+  // --------------------------------------------------
+
+  async function handleResetPassword(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    if (!resetAdmin) {
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+
+    if (newPassword.length < 8) {
+      setError(
+        "New password must contain at least 8 characters.",
+      );
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError(
+        "New password and confirmation password do not match.",
+      );
+      return;
+    }
+
+    setResettingPassword(true);
+
+    try {
+      const response = await fetch(
+        "/api/admin/administrators/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            authUserId: resetAdmin.auth_user_id,
+            newPassword,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Unable to reset administrator password.",
+        );
+      }
+
+      setSuccess(
+        data.message ||
+          `Password reset successfully for ${resetAdmin.full_name}.`,
+      );
+
+      setResetAdmin(null);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      console.error(
+        "Reset administrator password error:",
+        err,
+      );
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to reset administrator password.",
+      );
+    } finally {
+      setResettingPassword(false);
     }
   }
 
@@ -227,9 +372,9 @@ export default function AdminManagementPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 pb-12">
-      {/* ------------------------------------------------
+      {/* =================================================
           PAGE HEADER
-      ------------------------------------------------ */}
+      ================================================= */}
 
       <div className="py-8">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
@@ -246,9 +391,9 @@ export default function AdminManagementPage() {
         </p>
       </div>
 
-      {/* ------------------------------------------------
+      {/* =================================================
           ERROR MESSAGE
-      ------------------------------------------------ */}
+      ================================================= */}
 
       {error && (
         <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-sm leading-6 text-red-700">
@@ -256,9 +401,9 @@ export default function AdminManagementPage() {
         </div>
       )}
 
-      {/* ------------------------------------------------
+      {/* =================================================
           SUCCESS MESSAGE
-      ------------------------------------------------ */}
+      ================================================= */}
 
       {success && (
         <div className="mb-6 rounded-xl border border-green-300 bg-green-50 p-4 text-sm leading-6 text-green-800">
@@ -277,8 +422,8 @@ export default function AdminManagementPage() {
 
         <p className="mt-1 text-sm leading-6 text-[#68766d]">
           The new account will receive the normal{" "}
-          <strong>admin</strong> role. It will not
-          have Super Admin privileges.
+          <strong>admin</strong> role. It will not have
+          Super Admin privileges.
         </p>
 
         <form
@@ -450,6 +595,9 @@ export default function AdminManagementPage() {
                 const isSuperAdmin =
                   admin.role === "super_admin";
 
+                const isUpdating =
+                  updatingId === admin.id;
+
                 return (
                   <article
                     key={admin.id}
@@ -504,9 +652,7 @@ export default function AdminManagementPage() {
                             : "Inactive"}
                         </span>
 
-                        {/* --------------------------------
-                            NORMAL ADMIN ACTIONS ONLY
-                        --------------------------------- */}
+                        {/* NORMAL ADMIN ACTIONS */}
 
                         {!isSuperAdmin && (
                           <>
@@ -519,21 +665,29 @@ export default function AdminManagementPage() {
                                   admin,
                                 )
                               }
-                              className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                              disabled={isUpdating}
+                              className={`rounded-full border px-4 py-2 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
                                 admin.is_active
                                   ? "border-red-200 text-red-700 hover:bg-red-50"
                                   : "border-green-200 text-green-700 hover:bg-green-50"
                               }`}
                             >
-                              {admin.is_active
-                                ? "Deactivate"
-                                : "Activate"}
+                              {isUpdating
+                                ? "Updating..."
+                                : admin.is_active
+                                  ? "Deactivate"
+                                  : "Activate"}
                             </button>
 
                             {/* RESET PASSWORD */}
 
                             <button
                               type="button"
+                              onClick={() =>
+                                openResetPassword(
+                                  admin,
+                                )
+                              }
                               className="rounded-full border border-[#cfdcc9] px-4 py-2 text-xs font-semibold text-[#35543d] transition hover:bg-[#f1f6ed]"
                             >
                               Reset Password
@@ -543,9 +697,7 @@ export default function AdminManagementPage() {
                       </div>
                     </div>
 
-                    {/* ------------------------------------
-                        SUPER ADMIN PROTECTION MESSAGE
-                    ------------------------------------- */}
+                    {/* SUPER ADMIN PROTECTION MESSAGE */}
 
                     {isSuperAdmin && (
                       <div className="mt-5 rounded-xl border border-[#dce5d8] bg-[#f7faf5] px-4 py-3 text-sm leading-6 text-[#617268]">
@@ -562,6 +714,133 @@ export default function AdminManagementPage() {
           )}
         </div>
       </section>
+
+      {/* =================================================
+          RESET PASSWORD MODAL
+      ================================================= */}
+
+      {resetAdmin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            {/* MODAL HEADER */}
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
+                Administrator
+              </p>
+
+              <h3 className="mt-2 text-xl font-bold text-[#234f32]">
+                Reset Password
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-[#68766d]">
+                Set a new password for{" "}
+                <strong>
+                  {resetAdmin.full_name}
+                </strong>
+                .
+              </p>
+
+              <p className="mt-1 text-xs text-[#8a978f]">
+                {resetAdmin.email}
+              </p>
+            </div>
+
+            {/* RESET FORM */}
+
+            <form
+              onSubmit={handleResetPassword}
+              className="mt-6 space-y-5"
+            >
+              {/* NEW PASSWORD */}
+
+              <div>
+                <label
+                  htmlFor="reset-admin-password"
+                  className="block text-sm font-semibold text-[#344b3a]"
+                >
+                  New password
+                </label>
+
+                <input
+                  id="reset-admin-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) =>
+                    setNewPassword(
+                      event.target.value,
+                    )
+                  }
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  disabled={resettingPassword}
+                  placeholder="Minimum 8 characters"
+                  className="mt-2 w-full rounded-xl border border-[#d5dfd1] bg-white px-4 py-3 text-[#24382a] outline-none transition focus:border-[#376540] focus:ring-2 focus:ring-[#dcebd7] disabled:bg-gray-50"
+                />
+              </div>
+
+              {/* CONFIRM PASSWORD */}
+
+              <div>
+                <label
+                  htmlFor="reset-admin-password-confirm"
+                  className="block text-sm font-semibold text-[#344b3a]"
+                >
+                  Confirm new password
+                </label>
+
+                <input
+                  id="reset-admin-password-confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) =>
+                    setConfirmPassword(
+                      event.target.value,
+                    )
+                  }
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  disabled={resettingPassword}
+                  placeholder="Enter the password again"
+                  className="mt-2 w-full rounded-xl border border-[#d5dfd1] bg-white px-4 py-3 text-[#24382a] outline-none transition focus:border-[#376540] focus:ring-2 focus:ring-[#dcebd7] disabled:bg-gray-50"
+                />
+              </div>
+
+              {/* PASSWORD REQUIREMENT */}
+
+              <div className="rounded-xl border border-[#dce5d8] bg-[#f7faf5] px-4 py-3 text-xs leading-5 text-[#617268]">
+                The new password must contain at
+                least 8 characters.
+              </div>
+
+              {/* ACTIONS */}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeResetPassword}
+                  disabled={resettingPassword}
+                  className="rounded-full border border-[#cfdcc9] px-5 py-2.5 text-sm font-semibold text-[#35543d] transition hover:bg-[#f1f6ed] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={resettingPassword}
+                  className="rounded-full bg-[#2d6339] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#214e2d] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {resettingPassword
+                    ? "Resetting..."
+                    : "Reset Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

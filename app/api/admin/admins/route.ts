@@ -37,14 +37,12 @@ export async function GET() {
       error: requesterError,
     } = await supabase
       .from("admin_profiles")
-      .select(
-        `
-          id,
-          auth_user_id,
-          role,
-          is_active
-        `,
-      )
+      .select(`
+        id,
+        auth_user_id,
+        role,
+        is_active
+      `)
       .eq("auth_user_id", user.id)
       .eq("is_active", true)
       .maybeSingle();
@@ -64,16 +62,13 @@ export async function GET() {
     }
 
     // --------------------------------------------------
-    // 3. Use service-role client
+    // 3. Service-role client
     // --------------------------------------------------
 
     const adminSupabase = createAdminClient();
 
     // --------------------------------------------------
     // 4. Load administrators
-    //
-    // Includes the Super Admin so the management page
-    // can display the complete administrator list.
     // --------------------------------------------------
 
     const {
@@ -81,18 +76,16 @@ export async function GET() {
       error: adminsError,
     } = await adminSupabase
       .from("admin_profiles")
-      .select(
-        `
-          id,
-          auth_user_id,
-          full_name,
-          email,
-          phone,
-          role,
-          is_active,
-          created_at
-        `,
-      )
+      .select(`
+        id,
+        auth_user_id,
+        full_name,
+        email,
+        phone,
+        role,
+        is_active,
+        created_at
+      `)
       .in("role", ["admin", "super_admin"])
       .order("created_at", {
         ascending: false,
@@ -113,10 +106,6 @@ export async function GET() {
         { status: 500 },
       );
     }
-
-    // --------------------------------------------------
-    // 5. Always return JSON
-    // --------------------------------------------------
 
     return NextResponse.json({
       success: true,
@@ -140,10 +129,16 @@ export async function GET() {
   }
 }
 
-
 // ======================================================
 // PATCH
 // Activate / deactivate an administrator
+//
+// Expected body:
+//
+// {
+//   "id": "...",
+//   "isActive": false
+// }
 // ======================================================
 
 export async function PATCH(request: Request) {
@@ -176,14 +171,12 @@ export async function PATCH(request: Request) {
       error: requesterError,
     } = await supabase
       .from("admin_profiles")
-      .select(
-        `
-          id,
-          auth_user_id,
-          role,
-          is_active
-        `,
-      )
+      .select(`
+        id,
+        auth_user_id,
+        role,
+        is_active
+      `)
       .eq("auth_user_id", user.id)
       .eq("is_active", true)
       .maybeSingle();
@@ -204,13 +197,6 @@ export async function PATCH(request: Request) {
 
     // --------------------------------------------------
     // 3. Read request body
-    //
-    // Expected:
-    //
-    // {
-    //   id: "...",
-    //   isActive: false
-    // }
     // --------------------------------------------------
 
     const body = await request.json();
@@ -257,18 +243,16 @@ export async function PATCH(request: Request) {
       error: targetError,
     } = await adminSupabase
       .from("admin_profiles")
-      .select(
-        `
-          id,
-          auth_user_id,
-          full_name,
-          email,
-          phone,
-          role,
-          is_active,
-          created_at
-        `,
-      )
+      .select(`
+        id,
+        auth_user_id,
+        full_name,
+        email,
+        phone,
+        role,
+        is_active,
+        created_at
+      `)
       .eq("id", id)
       .maybeSingle();
 
@@ -339,18 +323,16 @@ export async function PATCH(request: Request) {
       })
       .eq("id", id)
       .eq("role", "admin")
-      .select(
-        `
-          id,
-          auth_user_id,
-          full_name,
-          email,
-          phone,
-          role,
-          is_active,
-          created_at
-        `,
-      )
+      .select(`
+        id,
+        auth_user_id,
+        full_name,
+        email,
+        phone,
+        role,
+        is_active,
+        created_at
+      `)
       .single();
 
     if (updateError || !updatedAdmin) {

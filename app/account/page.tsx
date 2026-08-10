@@ -7,11 +7,21 @@ import { createClient } from "@/lib/supabase/client";
 
 type AccountType =
   | "admin"
-  | "super_admin"
   | "customer"
   | "grower"
   | "both"
   | "unknown";
+
+type AdminProfile = {
+  id: string;
+  auth_user_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  role: "admin" | "super_admin" | string;
+  is_active: boolean;
+  created_at: string;
+};
 
 type CustomerProfile = {
   id: string;
@@ -25,17 +35,6 @@ type CustomerProfile = {
   state: string;
   pincode: string;
   status: string;
-};
-
-type AdminProfile = {
-  id: string;
-  auth_user_id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  role: "admin" | "super_admin";
-  is_active: boolean;
-  created_at: string;
 };
 
 type GrowerProfile = {
@@ -62,23 +61,29 @@ type GrowerVerification = {
   verification_notes: string | null;
 };
 
+type ActiveRole = "customer" | "grower";
+
 export default function AccountPage() {
   const supabase = createClient();
   const router = useRouter();
+
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const [userEmail, setUserEmail] = useState("");
 
+  const [admin, setAdmin] =
+    useState<AdminProfile | null>(null);
+
   const [customer, setCustomer] =
-  useState<CustomerProfile | null>(null);
+    useState<CustomerProfile | null>(null);
 
- const [admin, setAdmin] =
-  useState<AdminProfile | null>(null);
-
- const [grower, setGrower] =
-  useState<GrowerProfile | null>(null);
+  const [grower, setGrower] =
+    useState<GrowerProfile | null>(null);
 
   const [verification, setVerification] =
     useState<GrowerVerification | null>(null);
@@ -86,17 +91,40 @@ export default function AccountPage() {
   const [accountType, setAccountType] =
     useState<AccountType>("unknown");
 
-  const [errorMessage, setErrorMessage] = useState("");
+  const [activeRole, setActiveRole] =
+    useState<ActiveRole>("customer");
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  // ==========================================================
+  // INITIAL LOAD
+  // ==========================================================
 
   useEffect(() => {
     loadAccount();
   }, []);
 
+  // ==========================================================
+  // LOAD ACCOUNT
+  // ==========================================================
+
   async function loadAccount() {
     setLoading(true);
     setErrorMessage("");
 
+    // Clear old state before reloading.
+    setAdmin(null);
+    setCustomer(null);
+    setGrower(null);
+    setVerification(null);
+    setAccountType("unknown");
+
     try {
+      // ========================================================
+      // CURRENT AUTH USER
+      // ========================================================
+
       const {
         data: { user },
         error: userError,
@@ -109,68 +137,99 @@ export default function AccountPage() {
 
       setUserEmail(user.email ?? "");
 
-// --------------------------------------------------
-// ADMIN
-// --------------------------------------------------
+      // ========================================================
+      // ADMIN PROFILE
+      //
+      // IMPORTANT:
+      // We check admin_profiles FIRST.
+      //
+      // This is what prevents an administrator who also happens
+      // to have a customer_profiles row from being displayed as
+      // a Customer.
+      // ========================================================
 
-const {
-  data: adminData,
-  error: adminError,
-} = await supabase
-  .from("admin_profiles")
-  .select(`
-    id,
-    auth_user_id,
-    full_name,
-    email,
-    phone,
-    role,
-    is_active,
-    created_at
-  `)
-  .eq("auth_user_id", user.id)
-  .eq("is_active", true)
-  .maybeSingle();
+      const {
+        data: adminData,
+        error: adminError,
+      } = await supabase
+        .from("admin_profiles")
+        .select(
+          `
+            id,
+            auth_user_id,
+            full_name,
+            email,
+            phone,
+            role,
+            is_active,
+            created_at
+          `,
+        )
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
 
-if (adminError) {
-  console.error(
-    "Admin profile error:",
-    adminError
-  );
-}
+      if (adminError) {
+        console.error(
+          "Admin profile error:",
+          adminError,
+        );
+      }
 
-if (adminData) {
-  setAdmin(adminData as AdminProfile);
-}
+      // ========================================================
+      // IF ADMIN EXISTS
+      //
+      // ADMIN HAS PRIORITY.
+      //
+      // We deliberately do NOT use customer/grower profiles
+      // to determine the visible account type for an admin.
+      // ========================================================
 
-// --------------------------------------------------
-// CUSTOMER
-// --------------------------------------------------
+      if (adminData) {
+        setAdmin(adminData as AdminProfile);
+        setAccountType("admin");
+
+        // Stop here.
+        //
+        // We do not need to load customer/grower profiles for
+        // the account page because this is an administrator
+        // account.
+        setLoading(false);
+        return;
+      }
+
+      // ========================================================
+      // CUSTOMER PROFILE
+      //
+      // This section is only reached if the user is NOT an admin.
+      // ========================================================
+
       const {
         data: customerData,
         error: customerError,
       } = await supabase
         .from("customer_profiles")
-        .select(`
-          id,
-          auth_user_id,
-          full_name,
-          phone,
-          email,
-          address,
-          city,
-          district,
-          state,
-          pincode,
-          status
-        `)
+        .select(
+          `
+            id,
+            auth_user_id,
+            full_name,
+            phone,
+            email,
+            address,
+            city,
+            district,
+            state,
+            pincode,
+            status
+          `,
+        )
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
       if (customerError) {
         console.error(
           "Customer profile error:",
-          customerError
+          customerError,
         );
       }
 
@@ -178,59 +237,63 @@ if (adminData) {
         setCustomer(customerData as CustomerProfile);
       }
 
-      // --------------------------------------------------
-      // GROWER
-      // --------------------------------------------------
+      // ========================================================
+      // GROWER PROFILE
+      // ========================================================
 
       const {
         data: growerData,
         error: growerError,
       } = await supabase
         .from("growers")
-        .select(`
-          id,
-          grower_code,
-          full_name,
-          phone,
-          email,
-          location,
-          district,
-          state,
-          status,
-          source,
-          notes,
-          created_at,
-          approved_at,
-          auth_user_id
-        `)
+        .select(
+          `
+            id,
+            grower_code,
+            full_name,
+            phone,
+            email,
+            location,
+            district,
+            state,
+            status,
+            source,
+            notes,
+            created_at,
+            approved_at,
+            auth_user_id
+          `,
+        )
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
       if (growerError) {
         console.error(
           "Grower profile error:",
-          growerError
+          growerError,
         );
       }
 
       if (growerData) {
         setGrower(growerData as GrowerProfile);
 
-        // ----------------------------------------------
+        // ======================================================
         // GROWER VERIFICATION
-        // ----------------------------------------------
+        // ======================================================
 
         const {
           data: verificationData,
           error: verificationError,
         } = await supabase
           .from("grower_verification")
-          .select(`
-            verification_status,
-            submitted_at,
-            reviewed_at,
-            verification_notes
-          `)
+          .select(
+            `
+              verification_status,
+              submitted_at,
+              reviewed_at,
+              verification_notes
+            `,
+          )
           .eq("grower_id", growerData.id)
           .order("created_at", {
             ascending: false,
@@ -241,51 +304,50 @@ if (adminData) {
         if (verificationError) {
           console.error(
             "Grower verification error:",
-            verificationError
+            verificationError,
           );
         }
 
         if (verificationData) {
           setVerification(
-            verificationData as GrowerVerification
+            verificationData as GrowerVerification,
           );
         }
       }
 
-      // --------------------------------------------------
+      // ========================================================
       // ACCOUNT TYPE
-      // --------------------------------------------------
+      // ========================================================
 
-     if (adminData?.role === "super_admin") {
-  setAccountType("super_admin");
-} else if (adminData?.role === "admin") {
-  setAccountType("admin");
-} else if (customerData && growerData) {
-  setAccountType("both");
-} else if (customerData) {
-  setAccountType("customer");
-} else if (growerData) {
-  setAccountType("grower");
-} else {
-  setAccountType("unknown");
-}
+      if (customerData && growerData) {
+        setAccountType("both");
+        setActiveRole("customer");
+      } else if (customerData) {
+        setAccountType("customer");
+        setActiveRole("customer");
+      } else if (growerData) {
+        setAccountType("grower");
+        setActiveRole("grower");
+      } else {
+        setAccountType("unknown");
+      }
     } catch (error) {
       console.error(
         "Account loading error:",
-        error
+        error,
       );
 
       setErrorMessage(
-        "We could not load your account information."
+        "We could not load your account information.",
       );
     } finally {
       setLoading(false);
     }
   }
 
-  // ----------------------------------------------------
+  // ==========================================================
   // LOGOUT
-  // ----------------------------------------------------
+  // ==========================================================
 
   async function logout() {
     setLoggingOut(true);
@@ -297,11 +359,11 @@ if (adminData) {
     if (error) {
       console.error(
         "Logout error:",
-        error
+        error,
       );
 
       setErrorMessage(
-        "Could not log out. Please try again."
+        "Could not log out. Please try again.",
       );
 
       setLoggingOut(false);
@@ -312,87 +374,92 @@ if (adminData) {
     router.refresh();
   }
 
-  // ----------------------------------------------------
+  // ==========================================================
   // VERIFICATION STATUS
-  // ----------------------------------------------------
+  // ==========================================================
 
   function getVerificationStatus() {
     if (!grower) {
       return null;
     }
 
-    const status =
-      verification?.verification_status ||
-      grower.status ||
-      "pending";
-
-    switch (status.toLowerCase()) {
-      case "approved":
-        return {
-          title: "✓ Verified Grower",
-          description:
-            "Your grower account has been verified by Amruta Dhaanya.",
-          className:
-            "border-green-200 bg-green-50 text-green-800",
-        };
-
-      case "rejected":
-        return {
-          title:
-            "Verification requires attention",
-          description:
-            verification?.verification_notes ||
-            "Please contact Amruta Dhaanya for more information.",
-          className:
-            "border-red-200 bg-red-50 text-red-800",
-        };
-
-      default:
-        return {
-          title:
-            "Verification pending",
-          description:
-            "Our team will contact you by phone to verify your grower details and location. Your official Grower ID will be assigned after successful verification.",
-          className:
-            "border-amber-200 bg-amber-50 text-amber-800",
-        };
+    if (grower.status === "approved") {
+      return {
+        title: "✓ Verified Grower",
+        description:
+          `Your grower account is approved. Official ID: ${
+            grower.grower_code ||
+            "Not assigned"
+          }`,
+        className:
+          "border-green-200 bg-green-50 text-green-800",
+      };
     }
+
+    if (grower.status === "rejected") {
+      return {
+        title: "Verification Rejected",
+        description:
+          verification?.verification_notes ||
+          "Please contact Amruta Dhaanya support.",
+        className:
+          "border-red-200 bg-red-50 text-red-800",
+      };
+    }
+
+    return {
+      title: "⏳ Verification Pending",
+      description:
+        "Our team will contact you by phone to verify your grower details.",
+      className:
+        "border-yellow-200 bg-yellow-50 text-yellow-800",
+    };
   }
 
-  // ----------------------------------------------------
+  // ==========================================================
   // LOADING
-  // ----------------------------------------------------
+  // ==========================================================
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f7faf4]">
-        <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-          <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e7f0e1] text-3xl">
-              🌱
-            </div>
-
-            <p className="mt-5 text-sm text-[#68766d]">
-              Loading your account...
-            </p>
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f8f2] px-5">
+        <div className="text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#286039] text-3xl">
+            🌱
           </div>
+
+          <p className="mt-5 text-sm text-[#68766d]">
+            Loading your account...
+          </p>
         </div>
       </main>
     );
   }
 
+  // ==========================================================
+  // DERIVED VALUES
+  // ==========================================================
+
   const verificationStatus =
     getVerificationStatus();
 
+  const hasCustomer = !!customer;
+  const hasGrower = !!grower;
+  const isAdmin = !!admin;
+
+  // ==========================================================
+  // PAGE
+  // ==========================================================
+
   return (
-    <main className="min-h-screen bg-[#f7faf4]">
-      <div className="mx-auto max-w-5xl px-6 py-10 sm:px-8 lg:py-14">
+    <main className="min-h-screen bg-[#f5f8f2] px-5 py-10 sm:px-8">
+      <div className="mx-auto max-w-5xl">
 
-        {/* ------------------------------------------------ */}
-        {/* HEADER                                           */}
-        {/* ------------------------------------------------ */}
+        {/* ==================================================== */}
+        {/* HEADER                                               */}
+        {/* ==================================================== */}
 
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
           <div>
             <Link
               href="/"
@@ -401,14 +468,58 @@ if (adminData) {
               ← Back to Amruta Dhaanya
             </Link>
 
-            <h1 className="mt-5 text-4xl font-bold tracking-tight text-[#234f32]">
-              My Account
-            </h1>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <h1 className="text-4xl font-bold tracking-tight text-[#234f32]">
+                My Account
+              </h1>
+
+              {/* ADMIN BADGE */}
+
+              {isAdmin && (
+                <span
+                  className={`rounded-full px-4 py-2 text-sm font-bold ${
+                    admin?.role === "super_admin"
+                      ? "bg-[#234f32] text-white"
+                      : "bg-[#edf4e9] text-[#35613e]"
+                  }`}
+                >
+                  {admin?.role === "super_admin"
+                    ? "🛡️ Super Admin"
+                    : "🛡️ Admin"}
+                </span>
+              )}
+
+              {/* CUSTOMER BADGE */}
+
+              {!isAdmin &&
+                activeRole === "customer" &&
+                hasCustomer && (
+                  <span className="rounded-full bg-[#edf4e9] px-4 py-2 text-sm font-bold text-[#35613e]">
+                    🛒 Customer
+                  </span>
+                )}
+
+              {/* GROWER BADGE */}
+
+              {!isAdmin &&
+                activeRole === "grower" &&
+                hasGrower && (
+                  <span className="rounded-full bg-[#f1eadb] px-4 py-2 text-sm font-bold text-[#765d2b]">
+                    🌾 Grower
+                  </span>
+                )}
+            </div>
 
             <p className="mt-2 text-[#68766d]">
-              Manage your Amruta Dhaanya account.
+              {isAdmin
+                ? "Manage your Amruta Dhaanya administrator account."
+                : activeRole === "customer"
+                  ? "Manage your customer account, addresses, and shopping."
+                  : "Manage your grower profile, verification, and harvest."}
             </p>
           </div>
+
+          {/* LOGOUT */}
 
           <button
             type="button"
@@ -422,9 +533,9 @@ if (adminData) {
           </button>
         </div>
 
-        {/* ------------------------------------------------ */}
-        {/* ERROR                                            */}
-        {/* ------------------------------------------------ */}
+        {/* ==================================================== */}
+        {/* ERROR                                                */}
+        {/* ==================================================== */}
 
         {errorMessage && (
           <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -432,137 +543,532 @@ if (adminData) {
           </div>
         )}
 
-        {/* ------------------------------------------------ */}
-        {/* ACCOUNT SUMMARY                                  */}
-        {/* ------------------------------------------------ */}
+        {/* ==================================================== */}
+        {/* ADMIN ACCOUNT                                        */}
+        {/* ==================================================== */}
 
-        <section className="mt-10 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+        {isAdmin && admin && (
+          <>
+            {/* ADMIN SUMMARY */}
 
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#e7f0e1] text-4xl">
-              {accountType === "grower"
-                ? "🌾"
-                : accountType === "both"
-                  ? "🌱"
-                  : "🛒"}
-            </div>
+            <section className="mt-8 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
 
-            <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
-                Account
-              </p>
-
-              <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
-                {admin?.full_name ||
-                customer?.full_name ||
-                grower?.full_name ||
-  "Amruta Dhaanya Member"}
-              </h2>
-
-              <p className="mt-1 text-sm text-[#68766d]">
-                {userEmail}
-              </p>
-            </div>
-
-            <div className="rounded-full bg-[#edf4e9] px-5 py-2.5 text-sm font-semibold capitalize text-[#35613e]">
-            {accountType === "super_admin"
-            ? "Super Administrator Account"
-            : accountType === "admin"
-            ? "Administrator Account"
-            : accountType === "both"
-            ? "Customer + Grower"
-            : accountType === "grower"
-          ? "Grower Account"
-          : accountType === "customer"
-            ? "Customer Account"
-            : "Account"}
-          </div>
-          </div>
-        </section>
-
-        {/* ------------------------------------------------ */}
-        {/* GROWER ACCOUNT                                   */}
-        {/* ------------------------------------------------ */}
-
-        {grower && (
-          <section className="mt-6 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
-
-            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#edf4e9] px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#35613e]">
-                  🌾 Grower Account
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#e7f0e1] text-4xl">
+                  🛡️
                 </div>
 
-                <h2 className="mt-4 text-2xl font-bold text-[#234f32]">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
+                    Administrator Account
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
+                    {admin.full_name}
+                  </h2>
+
+                  <p className="mt-1 text-sm text-[#68766d]">
+                    {admin.email || userEmail}
+                  </p>
+                </div>
+
+                <div
+                  className={`rounded-full px-5 py-2.5 text-sm font-semibold ${
+                    admin.role === "super_admin"
+                      ? "bg-[#234f32] text-white"
+                      : "bg-[#edf4e9] text-[#35613e]"
+                  }`}
+                >
+                  {admin.role === "super_admin"
+                    ? "SUPER ADMIN"
+                    : "ADMIN"}
+                </div>
+              </div>
+            </section>
+
+            {/* ADMIN DETAILS */}
+
+            <section className="mt-6 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
+                  Administrator Profile
+                </p>
+
+                <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
+                  Administrator Details
+                </h2>
+              </div>
+
+              <div className="mt-8 grid gap-5 sm:grid-cols-2">
+
+                <InfoItem
+                  label="Full name"
+                  value={admin.full_name}
+                />
+
+                <InfoItem
+                  label="Email"
+                  value={
+                    admin.email ||
+                    userEmail ||
+                    "Not provided"
+                  }
+                />
+
+                <InfoItem
+                  label="Contact number"
+                  value={
+                    admin.phone ||
+                    "Not provided"
+                  }
+                />
+
+                <InfoItem
+                  label="Role"
+                  value={
+                    admin.role === "super_admin"
+                      ? "Super Admin"
+                      : "Administrator"
+                  }
+                />
+
+                <InfoItem
+                  label="Account status"
+                  value={
+                    admin.is_active
+                      ? "Active"
+                      : "Inactive"
+                  }
+                />
+
+                <InfoItem
+                  label="Created"
+                  value={formatDate(
+                    admin.created_at,
+                  )}
+                />
+              </div>
+            </section>
+
+            {/* ADMIN ACTIONS */}
+
+            <section className="mt-6 grid gap-5 sm:grid-cols-2">
+
+              <QuickAction
+                href="/admin"
+                icon="🛡️"
+                title="Admin Dashboard"
+                text="Open the Amruta Dhaanya administrator area."
+              />
+
+              {admin.role === "super_admin" ? (
+                <QuickAction
+                  href="/admin/admins"
+                  icon="👥"
+                  title="Manage Administrators"
+                  text="Create, manage, activate, deactivate, and reset administrator accounts."
+                />
+              ) : (
+                <QuickAction
+                  href="/"
+                  icon="🛒"
+                  title="Open Amruta Dhaanya"
+                  text="Return to the main Amruta Dhaanya website."
+                />
+              )}
+            </section>
+
+            {/* ADMIN NOTE */}
+
+            <section className="mt-6 rounded-[32px] bg-[#edf4e9] p-7 sm:p-9">
+              <h3 className="text-xl font-bold text-[#234f32]">
+                Administrator Account
+              </h3>
+
+              <p className="mt-3 text-sm leading-6 text-[#617268]">
+                This account is managed through the
+                Amruta Dhaanya administrator system.
+                Administrator accounts are separate
+                from normal customer and grower
+                accounts.
+              </p>
+
+              {admin.role === "super_admin" && (
+                <p className="mt-3 text-sm font-semibold leading-6 text-[#35613e]">
+                  You are the Super Admin. You can
+                  manage other administrator accounts.
+                </p>
+              )}
+            </section>
+          </>
+        )}
+
+        {/* ==================================================== */}
+        {/* ACCOUNT SWITCHER                                     */}
+        {/* ==================================================== */}
+
+        {!isAdmin &&
+          hasCustomer &&
+          hasGrower && (
+            <section className="mt-8 rounded-2xl border border-[#dce5d8] bg-white p-2 shadow-sm">
+              <div className="grid grid-cols-2 gap-2">
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveRole("customer")
+                  }
+                  className={`rounded-xl px-5 py-4 text-sm font-bold transition ${
+                    activeRole === "customer"
+                      ? "bg-[#2d6339] text-white shadow-sm"
+                      : "text-[#35613e] hover:bg-[#edf4e9]"
+                  }`}
+                >
+                  🛒 Customer
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveRole("grower")
+                  }
+                  className={`rounded-xl px-5 py-4 text-sm font-bold transition ${
+                    activeRole === "grower"
+                      ? "bg-[#765d2b] text-white shadow-sm"
+                      : "text-[#765d2b] hover:bg-[#f5f0e4]"
+                  }`}
+                >
+                  🌾 Grower
+                </button>
+
+              </div>
+            </section>
+          )}
+
+        {/* ==================================================== */}
+        {/* CUSTOMER ACCOUNT                                    */}
+        {/* ==================================================== */}
+
+        {!isAdmin &&
+          activeRole === "customer" &&
+          customer && (
+            <>
+              {/* CUSTOMER SUMMARY */}
+
+              <section className="mt-8 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#e7f0e1] text-4xl">
+                    🛒
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
+                      Customer Account
+                    </p>
+
+                    <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
+                      {customer.full_name}
+                    </h2>
+
+                    <p className="mt-1 text-sm text-[#68766d]">
+                      {userEmail}
+                    </p>
+                  </div>
+
+                  <div className="rounded-full bg-[#edf4e9] px-4 py-2 text-sm font-semibold capitalize text-[#35613e]">
+                    {customer.status}
+                  </div>
+                </div>
+              </section>
+
+              {/* CUSTOMER DETAILS */}
+
+              <section className="mt-6 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
+                    Profile
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
+                    Customer Details
+                  </h2>
+                </div>
+
+                <div className="mt-8 grid gap-5 sm:grid-cols-2">
+
+                  <InfoItem
+                    label="Full name"
+                    value={customer.full_name}
+                  />
+
+                  <InfoItem
+                    label="Contact number"
+                    value={customer.phone}
+                  />
+
+                  <InfoItem
+                    label="Email"
+                    value={customer.email}
+                  />
+
+                  <InfoItem
+                    label="State"
+                    value={customer.state}
+                  />
+
+                  <InfoItem
+                    label="City"
+                    value={
+                      customer.city ||
+                      "Not added"
+                    }
+                  />
+
+                  <InfoItem
+                    label="District"
+                    value={
+                      customer.district ||
+                      "Not added"
+                    }
+                  />
+
+                  <InfoItem
+                    label="Address"
+                    value={
+                      customer.address ||
+                      "Not added"
+                    }
+                  />
+
+                  <InfoItem
+                    label="Pincode"
+                    value={
+                      customer.pincode ||
+                      "Not added"
+                    }
+                  />
+
+                </div>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+
+                  <Link
+                    href="/account/addresses"
+                    className="rounded-full bg-[#2d6339] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#214e2d]"
+                  >
+                    Manage Addresses
+                  </Link>
+
+                  <Link
+                    href="/cart"
+                    className="rounded-full border border-[#376540] bg-white px-6 py-3 text-sm font-semibold text-[#2e5b39] transition hover:bg-[#e9f0e5]"
+                  >
+                    View Cart
+                  </Link>
+
+                </div>
+              </section>
+
+              {/* CUSTOMER ACTIONS */}
+
+              <section className="mt-6 grid gap-5 sm:grid-cols-3">
+
+                <QuickAction
+                  href="/"
+                  icon="🛍️"
+                  title="Shop Fresh"
+                  text="Browse today's available harvest."
+                />
+
+                <QuickAction
+                  href="/cart"
+                  icon="🧺"
+                  title="My Cart"
+                  text="View products you've selected."
+                />
+
+                <QuickAction
+                  href="/checkout"
+                  icon="📦"
+                  title="Checkout"
+                  text="Complete your purchase."
+                />
+
+              </section>
+            </>
+          )}
+
+        {/* ==================================================== */}
+        {/* GROWER ACCOUNT                                      */}
+        {/* ==================================================== */}
+
+        {!isAdmin &&
+          activeRole === "grower" &&
+          grower && (
+            <>
+              {/* GROWER SUMMARY */}
+
+              <section className="mt-8 rounded-[32px] border border-[#ded6c3] bg-white p-7 shadow-sm sm:p-9">
+
+                <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
+
+                  <div className="flex gap-5">
+
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#f1eadb] text-4xl">
+                      🌾
+                    </div>
+
+                    <div>
+
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#947b47]">
+                        Grower Account
+                      </p>
+
+                      <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
+                        {grower.full_name}
+                      </h2>
+
+                      <p className="mt-1 text-sm text-[#68766d]">
+                        {grower.email ||
+                          userEmail}
+                      </p>
+
+                    </div>
+                  </div>
+
+                  {/* GROWER ID */}
+
+                  <div className="rounded-2xl bg-[#234f32] px-5 py-4 text-white">
+
+                    <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#b8d3ad]">
+                      Official Grower ID
+                    </div>
+
+                    <div className="mt-1 text-xl font-bold tracking-wide">
+                      {grower.grower_code ||
+                        "Not assigned yet"}
+                    </div>
+
+                  </div>
+
+                </div>
+              </section>
+
+              {/* VERIFICATION */}
+
+              {verificationStatus && (
+                <section
+                  className={`mt-6 rounded-2xl border px-5 py-5 ${verificationStatus.className}`}
+                >
+                  <div className="font-bold">
+                    {verificationStatus.title}
+                  </div>
+
+                  <div className="mt-1 text-sm leading-6">
+                    {verificationStatus.description}
+                  </div>
+                </section>
+              )}
+
+              {/* GROWER DETAILS */}
+
+              <section className="mt-6 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
+
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
                   Grower Profile
+                </p>
+
+                <h2 className="mt-2 text-2xl font-bold text-[#234f32]">
+                  Your Grower Details
                 </h2>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#68766d]">
-                  Your grower registration is kept separate from your customer account.
-                </p>
-              </div>
+                <div className="mt-8 grid gap-5 sm:grid-cols-2">
 
-              {/* OFFICIAL ID */}
+                  <InfoItem
+                    label="Full name"
+                    value={grower.full_name}
+                  />
 
-              {grower.grower_code ? (
-                <div className="rounded-2xl bg-[#234f32] px-6 py-4 text-white">
-                  <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#b8d3ad]">
-                    Official Grower ID
-                  </div>
+                  <InfoItem
+                    label="Contact number"
+                    value={grower.phone}
+                  />
 
-                  <div className="mt-1 text-xl font-bold tracking-wide">
-                    {grower.grower_code}
-                  </div>
+                  <InfoItem
+                    label="Email"
+                    value={
+                      grower.email ||
+                      userEmail
+                    }
+                  />
+
+                  <InfoItem
+                    label="Growing location"
+                    value={
+                      grower.location ||
+                      "Not provided"
+                    }
+                  />
+
+                  <InfoItem
+                    label="District"
+                    value={
+                      grower.district ||
+                      "Not provided"
+                    }
+                  />
+
+                  <InfoItem
+                    label="State"
+                    value={
+                      grower.state ||
+                      "Telangana"
+                    }
+                  />
+
+                  <InfoItem
+                    label="Registration status"
+                    value={grower.status}
+                  />
+
+                  <InfoItem
+                    label="Registration source"
+                    value={grower.source}
+                  />
+
+                  <InfoItem
+                    label="Registered"
+                    value={formatDate(
+                      grower.created_at,
+                    )}
+                  />
+
+                  <InfoItem
+                    label="Approved"
+                    value={formatDate(
+                      grower.approved_at,
+                    )}
+                  />
+
                 </div>
-              ) : (
-                <div className="rounded-2xl bg-[#f3f5ef] px-6 py-4">
-                  <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#829080]">
-                    Official Grower ID
-                  </div>
+              </section>
 
-                  <div className="mt-1 font-semibold text-[#59695d]">
-                    Assigned after verification
-                  </div>
-                </div>
-              )}
-            </div>
+              {/* WHAT HAPPENS NEXT */}
 
-            {/* -------------------------------------------- */}
-            {/* VERIFICATION STATUS                           */}
-            {/* -------------------------------------------- */}
+              {!grower.grower_code && (
+                <section className="mt-6 rounded-[32px] bg-[#f1f6ed] p-7 sm:p-9">
 
-            {verificationStatus && (
-              <div
-                className={`mt-8 rounded-2xl border px-6 py-5 ${verificationStatus.className}`}
-              >
-                <div className="text-lg font-bold">
-                  {verificationStatus.title}
-                </div>
-
-                <div className="mt-2 text-sm leading-6">
-                  {verificationStatus.description}
-                </div>
-              </div>
-            )}
-
-            {/* -------------------------------------------- */}
-            {/* PENDING EXPLANATION                           */}
-            {/* -------------------------------------------- */}
-
-            {!grower.grower_code &&
-              grower.status.toLowerCase() !==
-                "approved" && (
-                <div className="mt-6 rounded-2xl bg-[#f1f6ed] p-6">
-
-                  <h3 className="font-bold text-[#234f32]">
+                  <h3 className="text-xl font-bold text-[#234f32]">
                     What happens next?
                   </h3>
 
-                  <ol className="mt-4 space-y-3 text-sm leading-6 text-[#617268]">
+                  <ol className="mt-5 space-y-3 text-sm leading-6 text-[#617268]">
+
                     <li>
                       <strong>1.</strong>{" "}
-                      We review your grower registration.
+                      Your registration is received.
                     </li>
 
                     <li>
@@ -572,255 +1078,83 @@ if (adminData) {
 
                     <li>
                       <strong>3.</strong>{" "}
-                      We verify your growing details and location.
+                      We verify your grower details
+                      and location.
                     </li>
 
                     <li>
                       <strong>4.</strong>{" "}
-                      Your official Grower ID is assigned based on your verified location.
+                      We assign your official Grower ID
+                      based on your location.
                     </li>
+
                   </ol>
 
-                  <div className="mt-5 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-[#35613e]">
-                    Example official ID: AD-WGL-G001
+                  <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-[#35613e]">
+                    Example: AD-WGL-G001
                   </div>
 
-                </div>
+                </section>
               )}
 
-            {/* -------------------------------------------- */}
-            {/* GROWER DETAILS                                */}
-            {/* -------------------------------------------- */}
+              {/* GROWER ACTIONS */}
 
-            <div className="mt-8 grid gap-5 sm:grid-cols-2">
+              <section className="mt-6 grid gap-5 sm:grid-cols-2">
 
-              <InfoItem
-                label="Full name"
-                value={grower.full_name}
-              />
+                <QuickAction
+                  href="/share-your-harvest"
+                  icon="🌾"
+                  title="Share Your Harvest"
+                  text="Submit and manage your available harvest."
+                />
 
-              <InfoItem
-                label="Contact number"
-                value={grower.phone}
-              />
+                <QuickAction
+                  href="/"
+                  icon="🛒"
+                  title="Shop as Customer"
+                  text="Browse and purchase fresh local products."
+                />
 
-              <InfoItem
-                label="Email"
-                value={
-                  grower.email ||
-                  userEmail ||
-                  "Not provided"
-                }
-              />
-
-              <InfoItem
-                label="Location"
-                value={
-                  grower.location ||
-                  "Not provided"
-                }
-              />
-
-              <InfoItem
-                label="District"
-                value={
-                  grower.district ||
-                  "Not provided"
-                }
-              />
-
-              <InfoItem
-                label="State"
-                value={
-                  grower.state ||
-                  "Telangana"
-                }
-              />
-
-              <InfoItem
-                label="Registration status"
-                value={grower.status}
-              />
-
-              <InfoItem
-                label="Registration source"
-                value={grower.source}
-              />
-
-              <InfoItem
-                label="Registered"
-                value={formatDate(
-                  grower.created_at
-                )}
-              />
-
-              <InfoItem
-                label="Approved"
-                value={formatDate(
-                  grower.approved_at
-                )}
-              />
-
-            </div>
-
-            {/* -------------------------------------------- */}
-            {/* GROWER ACTION                                */}
-            {/* -------------------------------------------- */}
-
-            {grower.grower_code &&
-              grower.status.toLowerCase() ===
-                "approved" && (
-                <div className="mt-8">
-                  <Link
-                    href="/share-your-harvest"
-                    className="inline-flex rounded-full bg-[#2d6339] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#214e2d]"
-                  >
-                    Share Your Harvest
-                  </Link>
-                </div>
-              )}
-
-          </section>
-        )}
-
-        {/* ------------------------------------------------ */}
-        {/* CUSTOMER ACCOUNT                                */}
-        {/* ------------------------------------------------ */}
-
-        {customer && !admin && (
-          <section className="mt-6 rounded-[32px] border border-[#dce5d8] bg-white p-7 shadow-sm sm:p-9">
-
-            <div className="flex items-center justify-between gap-4">
-
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#edf4e9] px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#35613e]">
-                  🛒 Customer Account
-                </div>
-
-                <h2 className="mt-4 text-2xl font-bold text-[#234f32]">
-                  Customer Profile
-                </h2>
-              </div>
-
-              <div className="rounded-full bg-[#edf4e9] px-4 py-2 text-xs font-semibold capitalize text-[#35613e]">
-                {customer.status}
-              </div>
-
-            </div>
-
-            <div className="mt-8 grid gap-5 sm:grid-cols-2">
-
-              <InfoItem
-                label="Full name"
-                value={customer.full_name}
-              />
-
-              <InfoItem
-                label="Contact number"
-                value={customer.phone}
-              />
-
-              <InfoItem
-                label="Email"
-                value={customer.email}
-              />
-
-              <InfoItem
-                label="State"
-                value={customer.state}
-              />
-
-              <InfoItem
-                label="City"
-                value={
-                  customer.city ||
-                  "Not added yet"
-                }
-              />
-
-              <InfoItem
-                label="District"
-                value={
-                  customer.district ||
-                  "Not added yet"
-                }
-              />
-
-              <InfoItem
-                label="Address"
-                value={
-                  customer.address ||
-                  "Not added yet"
-                }
-              />
-
-              <InfoItem
-                label="Pincode"
-                value={
-                  customer.pincode ||
-                  "Not added yet"
-                }
-              />
-
-            </div>
-
-            <div className="mt-7">
-              <Link
-                href="/account/addresses"
-                className="inline-flex rounded-full bg-[#2d6339] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#214e2d]"
-              >
-                Manage Addresses
-              </Link>
-            </div>
-
-          </section>
-        )}
-
-        {/* ------------------------------------------------ */}
-        {/* QUICK ACTIONS                                   */}
-        {/* ------------------------------------------------ */}
-
-        <section className="mt-6 grid gap-5 sm:grid-cols-3">
-
-          <QuickAction
-            href="/"
-            icon="🛒"
-            title="Continue Shopping"
-            text="Browse today's available products."
-          />
-
-          <QuickAction
-            href="/cart"
-            icon="🧺"
-            title="My Cart"
-            text="View the products you've selected."
-          />
-
-          {grower ? (
-            <QuickAction
-              href="/share-your-harvest"
-              icon="🌾"
-              title="Grower Area"
-              text={
-                grower.grower_code
-                  ? "Manage your harvest and grower activity."
-                  : "Check your grower verification status."
-              }
-            />
-          ) : (
-            <QuickAction
-              href="/signup"
-              icon="🌱"
-              title="Become a Grower"
-              text="Register to share your local harvest."
-            />
+              </section>
+            </>
           )}
 
-        </section>
+        {/* ==================================================== */}
+        {/* NO PROFILE SAFETY                                   */}
+        {/* ==================================================== */}
 
-        {/* ------------------------------------------------ */}
-        {/* FOOTER                                          */}
-        {/* ------------------------------------------------ */}
+        {!isAdmin &&
+          !hasCustomer &&
+          !hasGrower && (
+            <section className="mt-8 rounded-[32px] border border-[#dce5d8] bg-white p-8 text-center">
+
+              <div className="text-4xl">
+                🌱
+              </div>
+
+              <h2 className="mt-4 text-xl font-bold text-[#234f32]">
+                Account profile not found
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-[#68766d]">
+                Your login exists, but your Amruta
+                Dhaanya profile has not been created yet.
+              </p>
+
+              <button
+                type="button"
+                onClick={loadAccount}
+                className="mt-6 rounded-full bg-[#2d6339] px-6 py-3 text-sm font-semibold text-white hover:bg-[#214e2d]"
+              >
+                Refresh Account
+              </button>
+
+            </section>
+          )}
+
+        {/* ==================================================== */}
+        {/* FOOTER                                               */}
+        {/* ==================================================== */}
 
         <div className="py-10 text-center text-xs leading-5 text-[#89948d]">
           Amruta Dhaanya · An Ahaar Kutumbam Initiative
@@ -846,14 +1180,16 @@ function InfoItem({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl bg-[#f8faf6] p-4">
-      <div className="text-xs font-medium uppercase tracking-[0.12em] text-[#829080]">
+    <div className="rounded-2xl bg-[#f7faf5] p-4">
+
+      <div className="text-xs font-medium uppercase tracking-wide text-[#829080]">
         {label}
       </div>
 
       <div className="mt-2 break-words text-sm font-semibold text-[#344b3a]">
         {value}
       </div>
+
     </div>
   );
 }
@@ -878,6 +1214,7 @@ function QuickAction({
       href={href}
       className="rounded-[28px] border border-[#dce5d8] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
+
       <div className="text-3xl">
         {icon}
       </div>
@@ -889,6 +1226,7 @@ function QuickAction({
       <p className="mt-2 text-sm leading-6 text-[#68766d]">
         {text}
       </p>
+
     </Link>
   );
 }
@@ -898,7 +1236,7 @@ function QuickAction({
 // ============================================================
 
 function formatDate(
-  date: string | null | undefined
+  date: string | null | undefined,
 ) {
   if (!date) {
     return "Not available";

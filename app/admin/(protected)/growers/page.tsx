@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import AdminHeader from "@/components/admin/admin-header";
 
 type Registration = {
   id: string;
@@ -51,7 +50,7 @@ export default function GrowerVerificationPage() {
     useState<Record<string, string>>({});
 
   // ---------------------------------------------------------
-  // Load registrations
+  // LOAD REGISTRATIONS
   // ---------------------------------------------------------
 
   const loadRegistrations = useCallback(async () => {
@@ -76,11 +75,12 @@ export default function GrowerVerificationPage() {
         );
       }
 
-      setRegistrations(
-        data.registrations ?? [],
-      );
+      setRegistrations(data.registrations ?? []);
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Load grower registrations error:",
+        err,
+      );
 
       setError(
         err instanceof Error
@@ -97,7 +97,7 @@ export default function GrowerVerificationPage() {
   }, [loadRegistrations]);
 
   // ---------------------------------------------------------
-  // STEP 1: Match
+  // STEP 1: MATCH PHONE / EMAIL
   // ---------------------------------------------------------
 
   async function handleMatch(
@@ -136,7 +136,10 @@ export default function GrowerVerificationPage() {
 
       await loadRegistrations();
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Grower match error:",
+        err,
+      );
 
       setError(
         err instanceof Error
@@ -149,7 +152,7 @@ export default function GrowerVerificationPage() {
   }
 
   // ---------------------------------------------------------
-  // STEP 2: Confirm verification
+  // STEP 2: CONFIRM FARMER VERIFICATION
   // ---------------------------------------------------------
 
   async function handleConfirmVerification(
@@ -158,7 +161,7 @@ export default function GrowerVerificationPage() {
     try {
       setActionLoading(registrationId);
       setError(null);
-``
+
       const response = await fetch(
         "/api/admin/growers/confirm-verification",
         {
@@ -189,7 +192,10 @@ export default function GrowerVerificationPage() {
         "Farmer verification confirmed successfully.",
       );
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Confirm verification error:",
+        err,
+      );
 
       setError(
         err instanceof Error
@@ -202,7 +208,7 @@ export default function GrowerVerificationPage() {
   }
 
   // ---------------------------------------------------------
-  // STEP 3: Approve / Link
+  // STEP 3: APPROVE / LINK GROWER
   // ---------------------------------------------------------
 
   async function handleApprove(
@@ -220,14 +226,16 @@ export default function GrowerVerificationPage() {
       matchStatus === "phone" ||
       matchStatus === "email";
 
-    // Location code is only needed when creating
+    // -------------------------------------------------------
+    // Location code is only required when creating
     // a completely new Grower.
-    const locationCode =
-      (
-        locationCodes[registration.id] ?? ""
-      )
-        .trim()
-        .toUpperCase();
+    // -------------------------------------------------------
+
+    const locationCode = (
+      locationCodes[registration.id] ?? ""
+    )
+      .trim()
+      .toUpperCase();
 
     if (
       !isExistingGrower &&
@@ -261,8 +269,7 @@ export default function GrowerVerificationPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            registrationId:
-              registration.id,
+            registrationId: registration.id,
             locationCode:
               locationCode || null,
             verificationNotes:
@@ -280,8 +287,7 @@ export default function GrowerVerificationPage() {
         );
       }
 
-      const approval =
-        data.approval;
+      const approval = data.approval;
 
       alert(
         `Grower approved successfully.\n\nOfficial Grower ID: ${
@@ -298,7 +304,10 @@ export default function GrowerVerificationPage() {
         return next;
       });
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Approve grower error:",
+        err,
+      );
 
       setError(
         err instanceof Error
@@ -311,66 +320,98 @@ export default function GrowerVerificationPage() {
   }
 
   // ---------------------------------------------------------
-  // UI
+  // PAGE
   // ---------------------------------------------------------
 
- return (
-  <main className="mx-auto max-w-6xl px-4 py-8">
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      {/* ---------------------------------------------------
+          PAGE TITLE
 
-    <AdminHeader
-      fullName="Administrator"
-      email={null}
-      role="super_admin"
-    />
+          IMPORTANT:
+          AdminHeader is NOT rendered here.
 
-    <div className="mt-8">
-      <p>Amruta Dhaanya Admin</p>
+          It is already rendered by:
+          app/admin/(protected)/layout.tsx
+      --------------------------------------------------- */}
 
-      <h1 className="mt-2 text-2xl font-bold">
-        Grower Verification
-      </h1>
+      <div className="mb-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#70915f]">
+          Amruta Dhaanya Admin
+        </p>
 
-      <p className="mt-2 text-gray-600">
-        Review website grower registrations,
-        verify the farmer, and assign or link
-        the official Grower ID.
-      </p>
-    </div>
+        <h1 className="mt-2 text-2xl font-bold text-[#234f32]">
+          Grower Verification
+        </h1>
+
+        <p className="mt-2 max-w-3xl text-[#68766d]">
+          Review website grower registrations,
+          verify the farmer, and assign or link
+          the official Grower ID.
+        </p>
+      </div>
+
+      {/* ---------------------------------------------------
+          ERROR
+      --------------------------------------------------- */}
 
       {error && (
-        <div className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-red-700">
+        <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-sm leading-6 text-red-700">
           {error}
         </div>
       )}
 
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
+      {/* ---------------------------------------------------
+          PENDING REGISTRATIONS HEADER
+      --------------------------------------------------- */}
+
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold text-[#234f32]">
           Pending registrations
         </h2>
 
         <button
           type="button"
           onClick={loadRegistrations}
-          className="rounded-lg border px-4 py-2 hover:bg-gray-50"
+          disabled={loading}
+          className="rounded-full border border-[#cfdcc9] px-4 py-2 text-sm font-medium text-[#35543d] transition hover:bg-[#f1f6ed] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Refresh
+          {loading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
-      {registrations.length === 0 ? (
-        <div className="rounded-xl border p-8 text-center">
-          <p className="text-lg font-medium">
+      {/* ---------------------------------------------------
+          LOADING
+      --------------------------------------------------- */}
+
+      {loading ? (
+        <div className="rounded-xl border border-dashed border-[#cfdcc9] bg-white p-8 text-center text-sm text-[#68766d]">
+          Loading grower registrations...
+        </div>
+      ) : registrations.length === 0 ? (
+        /* -------------------------------------------------
+           EMPTY
+        ------------------------------------------------- */
+
+        <div className="rounded-xl border border-dashed border-[#cfdcc9] bg-white p-8 text-center">
+          <p className="text-lg font-medium text-[#234f32]">
             No pending registrations
+          </p>
+
+          <p className="mt-2 text-sm text-[#68766d]">
+            New grower registrations will appear here.
           </p>
         </div>
       ) : (
+        /* -------------------------------------------------
+           REGISTRATION LIST
+        ------------------------------------------------- */
+
         <div className="space-y-6">
           {registrations.map(
             (registration) => {
               const match =
-                matchResults[
-                  registration.id
-                ];
+                matchResults[registration.id];
 
               const busy =
                 actionLoading ===
@@ -388,40 +429,35 @@ export default function GrowerVerificationPage() {
                 matchStatus ===
                 "phone_and_email";
 
-              const isMatched =
-                matchStatus ===
-                  "phone" ||
-                matchStatus ===
-                  "email" ||
-                matchStatus ===
-                  "phone_and_email";
-
               const verified =
                 registration.verification_confirmed;
 
               return (
                 <article
                   key={registration.id}
-                  className="rounded-xl border bg-white p-6 shadow-sm"
+                  className="rounded-2xl border border-[#dce5d8] bg-white p-6 shadow-sm"
                 >
-                  <div className="flex items-start justify-between gap-6">
+                  {/* ------------------------------------------------
+                      REGISTRATION INFORMATION
+                  ------------------------------------------------ */}
+
+                  <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <h3 className="text-xl font-semibold">
+                      <h3 className="text-xl font-semibold text-[#234f32]">
                         {registration.full_name}
                       </h3>
 
-                      <p className="mt-2">
+                      <p className="mt-2 text-[#45564a]">
                         📞 {registration.phone}
                       </p>
 
                       {registration.email && (
-                        <p>
-                          ✉️{" "}
-                          {registration.email}
+                        <p className="text-[#45564a]">
+                          ✉️ {registration.email}
                         </p>
                       )}
 
-                      <p className="mt-2">
+                      <p className="mt-2 text-[#45564a]">
                         📍{" "}
                         {registration.location ||
                           "Location not provided"}
@@ -431,24 +467,35 @@ export default function GrowerVerificationPage() {
                           : ""}
                       </p>
 
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-[#8a978f]">
                         Registration ID:
                         <br />
-                        <span className="font-mono">
+
+                        <span className="font-mono text-xs">
                           {registration.id}
                         </span>
                       </p>
 
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-[#8a978f]">
                         Registered{" "}
                         {new Date(
                           registration.created_at,
-                        ).toLocaleDateString()}
+                        ).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm text-yellow-800">
+                    <div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          verified
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
                         {verified
                           ? "Verification confirmed"
                           : "Verification pending"}
@@ -456,28 +503,29 @@ export default function GrowerVerificationPage() {
                     </div>
                   </div>
 
-                  {/* Match information */}
-                  <div className="mt-6 rounded-lg bg-gray-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <strong>
+                  {/* ------------------------------------------------
+                      MATCH INFORMATION
+                  ------------------------------------------------ */}
+
+                  <div className="mt-6 rounded-xl bg-[#f7faf5] p-4">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <strong className="text-[#344b3a]">
                         Match status
                       </strong>
 
-                      <span>
+                      <span className="font-medium text-[#35543d]">
                         {matchStatus}
                       </span>
                     </div>
 
                     {match && (
-                      <div className="mt-4 space-y-1 text-sm">
+                      <div className="mt-4 space-y-1 text-sm text-[#617268]">
                         {match.grower_code && (
                           <p>
                             <strong>
                               Existing Grower ID:
                             </strong>{" "}
-                            {
-                              match.grower_code
-                            }
+                            {match.grower_code}
                           </p>
                         )}
 
@@ -517,31 +565,38 @@ export default function GrowerVerificationPage() {
                     )}
                   </div>
 
-                  {/* Mismatch */}
+                  {/* ------------------------------------------------
+                      POSSIBLE MISMATCH
+                  ------------------------------------------------ */}
+
                   {isMismatch && (
-                    <div className="mt-4 rounded-lg border border-red-300 bg-red-50 p-4 text-red-700">
+                    <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-sm leading-6 text-red-700">
                       <strong>
                         Possible mismatch
                       </strong>
 
                       <p className="mt-1">
-                        Phone and email appear
-                        to belong to different
-                        growers. Approval is
-                        blocked until the
-                        administrator investigates.
+                        Phone and email appear to
+                        belong to different growers.
+                        Approval is blocked until
+                        the administrator
+                        investigates.
                       </p>
                     </div>
                   )}
 
-                  {/* New Grower location */}
+                  {/* ------------------------------------------------
+                      NEW GROWER LOCATION CODE
+                  ------------------------------------------------ */}
+
                   {!isExistingExact &&
                     matchStatus ===
                       "no_match" && (
                       <div className="mt-6">
                         <label className="block">
-                          <span className="mb-1 block text-sm font-medium">
-                            Location code for new Grower ID
+                          <span className="mb-1 block text-sm font-medium text-[#344b3a]">
+                            Location code for new
+                            Grower ID
                           </span>
 
                           <input
@@ -562,18 +617,21 @@ export default function GrowerVerificationPage() {
                             }
                             placeholder="WGL"
                             maxLength={6}
-                            className="w-full rounded-lg border px-3 py-2"
+                            className="w-full rounded-xl border border-[#d5dfd1] px-3 py-2.5 text-[#24382a] outline-none transition focus:border-[#376540] focus:ring-2 focus:ring-[#dcebd7]"
                           />
                         </label>
                       </div>
                     )}
 
-                  {/* Notes */}
+                  {/* ------------------------------------------------
+                      VERIFICATION NOTES
+                  ------------------------------------------------ */}
+
                   {match &&
                     !isMismatch && (
                       <div className="mt-6">
                         <label className="block">
-                          <span className="mb-1 block text-sm font-medium">
+                          <span className="mb-1 block text-sm font-medium text-[#344b3a]">
                             Verification notes
                           </span>
 
@@ -594,15 +652,19 @@ export default function GrowerVerificationPage() {
                             }
                             placeholder="Verified by phone"
                             rows={3}
-                            className="w-full rounded-lg border px-3 py-2"
+                            className="w-full rounded-xl border border-[#d5dfd1] px-3 py-2.5 text-[#24382a] outline-none transition focus:border-[#376540] focus:ring-2 focus:ring-[#dcebd7]"
                           />
                         </label>
                       </div>
                     )}
 
-                  {/* Buttons */}
+                  {/* ------------------------------------------------
+                      ACTION BUTTONS
+                  ------------------------------------------------ */}
+
                   <div className="mt-6 flex flex-wrap gap-3">
                     {/* STEP 1 */}
+
                     {!match &&
                       matchStatus ===
                         "not_checked" && (
@@ -614,7 +676,7 @@ export default function GrowerVerificationPage() {
                               registration.id,
                             )
                           }
-                          className="rounded-lg bg-black px-5 py-2 text-white disabled:opacity-50"
+                          className="rounded-full bg-[#234f32] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#183d25] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {busy
                             ? "Checking..."
@@ -623,6 +685,7 @@ export default function GrowerVerificationPage() {
                       )}
 
                     {/* STEP 2 */}
+
                     {match &&
                       !isMismatch &&
                       !verified && (
@@ -634,7 +697,7 @@ export default function GrowerVerificationPage() {
                               registration.id,
                             )
                           }
-                          className="rounded-lg bg-blue-700 px-5 py-2 text-white disabled:opacity-50"
+                          className="rounded-full bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {busy
                             ? "Confirming..."
@@ -643,6 +706,7 @@ export default function GrowerVerificationPage() {
                       )}
 
                     {/* STEP 3 */}
+
                     {match &&
                       !isMismatch &&
                       verified && (
@@ -654,7 +718,7 @@ export default function GrowerVerificationPage() {
                               registration,
                             )
                           }
-                          className="rounded-lg bg-green-700 px-5 py-2 text-white disabled:opacity-50"
+                          className="rounded-full bg-[#2d6339] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#214e2d] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {busy
                             ? "Processing..."
@@ -665,9 +729,12 @@ export default function GrowerVerificationPage() {
                       )}
                   </div>
 
-                  {/* Existing grower explanation */}
+                  {/* ------------------------------------------------
+                      EXISTING GROWER EXPLANATION
+                  ------------------------------------------------ */}
+
                   {isExistingExact && (
-                    <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                    <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4 text-sm leading-6 text-green-800">
                       <strong>
                         Existing grower found.
                       </strong>
@@ -683,10 +750,13 @@ export default function GrowerVerificationPage() {
                     </div>
                   )}
 
-                  {/* New grower explanation */}
+                  {/* ------------------------------------------------
+                      NEW GROWER EXPLANATION
+                  ------------------------------------------------ */}
+
                   {matchStatus ===
                     "no_match" && (
-                    <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+                    <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
                       <strong>
                         No existing grower found.
                       </strong>
@@ -707,6 +777,6 @@ export default function GrowerVerificationPage() {
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }

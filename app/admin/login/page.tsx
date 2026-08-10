@@ -12,63 +12,55 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [resetting, setResetting] = useState(false);
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  async function handleLogin(event: FormEvent) {
     event.preventDefault();
 
     setLoading(true);
     setErrorMessage("");
+    setSuccessMessage("");
 
     try {
-      // ------------------------------------------------------
-      // SIGN IN
-      // ------------------------------------------------------
-
       const { data, error } =
         await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           password,
         });
 
       if (error) {
         console.error("Admin login error:", error);
 
-        setErrorMessage(
-          "Invalid email or password.",
-        );
-
+        setErrorMessage("Invalid email or password.");
         return;
       }
 
       if (!data.user) {
-        setErrorMessage(
-          "We could not sign you in.",
-        );
-
+        setErrorMessage("We could not sign you in.");
         return;
       }
 
-      // ------------------------------------------------------
-      // CHECK ADMIN PROFILE
-      // ------------------------------------------------------
-
-      const { data: adminProfile, error: adminError } =
-        await supabase
-          .from("admin_profiles")
-          .select(
-            `
-              id,
-              auth_user_id,
-              full_name,
-              email,
-              role,
-              is_active
-            `,
-          )
-          .eq("auth_user_id", data.user.id)
-          .eq("is_active", true)
-          .maybeSingle();
+      const {
+        data: adminProfile,
+        error: adminError,
+      } = await supabase
+        .from("admin_profiles")
+        .select(
+          `
+            id,
+            auth_user_id,
+            full_name,
+            email,
+            role,
+            is_active
+          `,
+        )
+        .eq("auth_user_id", data.user.id)
+        .eq("is_active", true)
+        .maybeSingle();
 
       if (adminError) {
         console.error(
@@ -86,8 +78,10 @@ export default function AdminLoginPage() {
       }
 
       if (
-       !adminProfile ||
-      !["admin", "super_admin"].includes(adminProfile.role)
+        !adminProfile ||
+        !["admin", "super_admin"].includes(
+          adminProfile.role,
+        )
       ) {
         await supabase.auth.signOut();
 
@@ -98,17 +92,13 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // ------------------------------------------------------
-      // ADMIN VERIFIED
-      // ------------------------------------------------------
-
       if (adminProfile.role === "super_admin") {
-    router.replace("/admin/admins");
-    } else {
-    router.replace("/admin/growers");
-    }
+        router.replace("/admin/admins");
+      } else {
+        router.replace("/admin/growers");
+      }
 
-    router.refresh();
+      router.refresh();
     } catch (error) {
       console.error(
         "Unexpected admin login error:",
@@ -123,12 +113,71 @@ export default function AdminLoginPage() {
     }
   }
 
+  async function handleForgotPassword() {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setErrorMessage(
+        "Enter your administrator email first.",
+      );
+      return;
+    }
+
+    setResetting(true);
+
+    try {
+      const resetUrl =
+         `${window.location.origin}` +
+         "/auth/callback?next=/admin/reset-password";
+
+      const { error } =
+        await supabase.auth.resetPasswordForEmail(
+          normalizedEmail,
+          {
+            redirectTo: resetUrl,
+          },
+        );
+
+      if (error) {
+        console.error(
+          "Admin password recovery error:",
+          error,
+        );
+
+        setErrorMessage(
+          error.message ||
+            "Unable to send password reset email.",
+        );
+
+        return;
+      }
+
+      setSuccessMessage(
+        "If this administrator account exists, a password reset link has been sent to the email address.",
+      );
+    } catch (error) {
+      console.error(
+        "Unexpected password recovery error:",
+        error,
+      );
+
+      setErrorMessage(
+        "Unable to send password reset email.",
+      );
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-[#f5f8f2] px-6 py-12">
-      <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
-        <div className="w-full rounded-[32px] border border-[#dce5d8] bg-white p-8 shadow-sm sm:p-10">
+    <main className="min-h-screen bg-[#f7faf5]">
+      <div className="mx-auto flex min-h-screen max-w-md items-center px-6 py-12">
+        <div className="w-full rounded-3xl border border-[#dce5d8] bg-white p-8 shadow-sm">
           <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e7f0e1] text-3xl">
+            <div className="text-4xl">
               🔒
             </div>
 
@@ -149,6 +198,12 @@ export default function AdminLoginPage() {
           {errorMessage && (
             <div className="mt-7 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
               {errorMessage}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mt-7 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm leading-6 text-green-800">
+              {successMessage}
             </div>
           )}
 
@@ -202,7 +257,7 @@ export default function AdminLoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || resetting}
               className="w-full rounded-full bg-[#2d6339] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#214e2d] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading
@@ -210,6 +265,19 @@ export default function AdminLoginPage() {
                 : "Sign in as Administrator"}
             </button>
           </form>
+
+          <div className="mt-5 text-center">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={loading || resetting}
+              className="text-sm font-medium text-[#4c6652] hover:text-[#2d6339] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {resetting
+                ? "Sending reset link..."
+                : "Forgot password?"}
+            </button>
+          </div>
 
           <div className="mt-7 text-center">
             <a

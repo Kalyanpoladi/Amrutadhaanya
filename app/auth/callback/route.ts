@@ -3,7 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+
   const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next");
 
   if (!code) {
     return NextResponse.redirect(
@@ -32,7 +34,22 @@ export async function GET(request: Request) {
       )
     );
   }
+// ------------------------------------------------------
+// PASSWORD RECOVERY
+// ------------------------------------------------------
+//
+// Password recovery uses the same Supabase auth callback,
+// but it must NOT create customer/grower business records.
+//
+// After the recovery code is exchanged for a session,
+// send the user directly to the admin password reset page.
+//
 
+if (next === "/admin/reset-password") {
+  return NextResponse.redirect(
+    new URL("/admin/reset-password", requestUrl.origin)
+  );
+}
   /*
    * Get the authenticated user.
    */
