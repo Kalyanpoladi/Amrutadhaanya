@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export function AccountMenu() {
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
@@ -27,6 +29,7 @@ export function AccountMenu() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setEmail(session?.user?.email ?? null);
+      setLoading(false);
     });
 
     return () => {
@@ -45,7 +48,8 @@ export function AccountMenu() {
       return;
     }
 
-    window.location.href = "/";
+    router.push("/");
+    router.refresh();
   }
 
   if (loading) {
@@ -55,10 +59,11 @@ export function AccountMenu() {
   if (!email) {
     return (
       <Button
+        type="button"
         variant="outline"
         className="rounded-full border-[#376540] bg-transparent px-6 text-[#2e5b39] hover:bg-[#e9f0e5]"
         onClick={() => {
-          window.location.href = "/login";
+          router.push("/login");
         }}
       >
         Login
@@ -70,12 +75,13 @@ export function AccountMenu() {
     <div className="flex items-center gap-3">
       <div className="hidden text-right sm:block">
         <div className="text-xs text-[#71836e]">Logged in as</div>
+
         <Link
-        href="/account"
-        className="max-w-[220px] truncate text-sm font-semibold text-[#2e5b39] hover:underline"
+          href="/account"
+          className="block max-w-[220px] truncate text-sm font-semibold text-[#2e5b39] hover:underline"
         >
-        {email}
-      </Link>
+          {email}
+        </Link>
       </div>
 
       <Button

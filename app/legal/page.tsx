@@ -181,7 +181,7 @@ export default function LegalPage() {
                       Growers and local sellers may participate through
                       the Amruta Dhaanya network. Seller information may
                       be handled privately while orders remain traceable
-                      within the platform's operating process.
+                      within the platform&apos;s operating process.
                     </p>
                   </div>
                 </div>

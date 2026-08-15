@@ -88,8 +88,56 @@ export default function AdminManagementPage() {
   }
 
   useEffect(() => {
-    loadAdmins();
-  }, []);
+  let cancelled = false;
+
+  async function load() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch("/api/admin/admins", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Unable to load administrator accounts.",
+        );
+      }
+
+      if (!cancelled) {
+        setAdmins(data.admins ?? []);
+      }
+    } catch (err) {
+      console.error(
+        "Load administrators error:",
+        err,
+      );
+
+      if (!cancelled) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load administrator accounts.",
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  }
+
+  load();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   // --------------------------------------------------
   // CREATE ADMINISTRATOR

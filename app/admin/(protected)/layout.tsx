@@ -4,15 +4,6 @@ import AdminHeader from "@/components/admin/admin-header";
 
 type AdminRole = "admin" | "super_admin";
 
-type AdminProfile = {
-  id: string;
-  auth_user_id: string;
-  full_name: string;
-  email: string | null;
-  role: AdminRole;
-  is_active: boolean;
-};
-
 export default async function ProtectedAdminLayout({
   children,
 }: {
@@ -44,7 +35,7 @@ export default async function ProtectedAdminLayout({
   // - name
   // - browser state
   // - localStorage
-  // - cookies created by the frontend
+  // - frontend-created cookies
   //
   // Supabase Auth user ID is the source of the relationship.
   // ======================================================
@@ -80,9 +71,7 @@ export default async function ProtectedAdminLayout({
   if (
     profileError ||
     !adminProfile ||
-    !["admin", "super_admin"].includes(
-      adminProfile.role,
-    )
+    !["admin", "super_admin"].includes(adminProfile.role)
   ) {
     redirect("/admin/login");
   }
@@ -104,34 +93,18 @@ export default async function ProtectedAdminLayout({
   //
   // AdminHeader receives the role directly from the
   // authenticated user's database profile.
-  //
-  // Therefore:
-  //
-  // Kalyan Reddy:
-  //   role = super_admin
-  //   Header = Super Admin
-  //
-  // Test Admin:
-  //   role = admin
-  //   Header = Administrator
   // ======================================================
 
   return (
     <main className="min-h-screen bg-[#f7faf5]">
       <AdminHeader
         fullName={adminProfile.full_name}
-        email={
-          adminProfile.email ||
-          user.email ||
-          null
-        }
+        email={adminProfile.email || user.email || null}
         role={role}
       />
 
       <div className="mx-auto max-w-7xl px-6 pb-12">
-        <div className="mt-8">
-          {children}
-        </div>
+        <div className="mt-8">{children}</div>
       </div>
     </main>
   );

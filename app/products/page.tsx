@@ -17,17 +17,11 @@ import {
   X,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
-
+import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -99,40 +93,6 @@ const products = [
   },
 ];
 
-const faqs = [
-  {
-    question:
-      "What is Ahaar Kutumbam and how is it different from Amruta Dhaanya?",
-    answer:
-      "Ahaar Kutumbam is the wider community initiative connecting growers, local agents and families. Amruta Dhaanya is the customer-facing marketplace built within that initiative.",
-  },
-  {
-    question:
-      "How do I know the products are genuinely traditional?",
-    answer:
-      "We work with registered local growers and sellers, check products before listing and confirm actual availability before an order is processed.",
-  },
-  {
-    question: "Where do you currently deliver?",
-    answer:
-      "We are currently testing delivery and pickup support in selected areas of Warangal, Hanamkonda, Kazipet and nearby local communities.",
-  },
-  {
-    question: "How fresh is the stock?",
-    answer:
-      "We don't operate like a warehouse-based quick-commerce service. Availability is based on what local growers genuinely have available.",
-  },
-  {
-    question: "How do I become a grower partner?",
-    answer:
-      "Use the Share Your Harvest section and submit your details. Our team will contact you, understand what you grow and guide you through registration.",
-  },
-  {
-    question: "What if a product I ordered isn't available?",
-    answer:
-      "We confirm availability, final price and delivery before processing. If something isn't available, we tell you before payment rather than after.",
-  },
-];
 
 /* -------------------------------------------------------------------------- */
 /* HARVEST MARQUEE                                                            */
@@ -203,7 +163,7 @@ function HarvestMarquee() {
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const { scrollYProgress } = useScroll();
 
@@ -263,7 +223,6 @@ export default function Home() {
       console.error("Logout error:", error);
       return;
     }
-
     setUser(null);
   }
 
@@ -563,7 +522,7 @@ export default function Home() {
                 Amruta Dhaanya connects families with
                 traditional foods sourced directly from
                 growers we know by name — no warehouses,
-                no anonymous sellers, only what's
+                no anonymous sellers, only What&apos;s
                 genuinely available today.
               </motion.p>
 
@@ -656,7 +615,7 @@ export default function Home() {
                 <div className="relative min-h-[430px] overflow-hidden rounded-[30px] bg-[#d8e5cf] p-7">
                   <div className="flex items-center justify-between">
                     <Badge className="rounded-full bg-white/90 px-4 py-2 text-[#35613e]">
-                      Today's harvest
+                      Today&apos;s harvest
                     </Badge>
 
                     <motion.div
@@ -1185,15 +1144,15 @@ export default function Home() {
 
               <h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
                 Real availability. Private sellers. Nothing
-                promised until it's confirmed.
+                promised until it&apos;s confirmed.
               </h2>
 
               <p className="mt-5 text-lg leading-8 text-[#66756b]">
-                We don't stock a warehouse and we
-                don't promise everything, every day.
+                We don&apos;t stock a warehouse and we
+                don&apos;t promise everything, every day.
                 Every item comes from a registered local
                 seller, is checked for basic freshness
-                before it's listed, and is confirmed
+                before it&apos;s listed, and is confirmed
                 with you before anything is processed or
                 paid for.
               </p>
@@ -1209,12 +1168,12 @@ export default function Home() {
                 [
                   "02",
                   "Checked Before Listing",
-                  "Poor-quality or damaged items simply aren't listed. What's available is what genuinely passed a basic freshness check.",
+                  "Poor-quality or damaged items simply aren&apos;t listed. What&apos;s available is what genuinely passed a basic freshness check.",
                 ],
                 [
                   "03",
                   "Confirmed Before Payment",
-                  "We confirm stock, final price and delivery with you first. If something isn't available, you'll know before you pay.",
+                  "We confirm stock, final price and delivery with you first. If something isn&apos;t available, you'll know before you pay.",
                 ],
                 [
                   "04",
@@ -1286,7 +1245,7 @@ export default function Home() {
                   "01",
                   Search,
                   "Browse & Order",
-                  "Choose from today's available products or select a planned weekly basket.",
+                  "Choose from today&apos;s available products or select a planned weekly basket.",
                 ],
                 [
                   "02",
@@ -1385,7 +1344,7 @@ export default function Home() {
                   </div>
 
                   <p className="mt-3 text-xs text-[#748279]">
-                    We'll open WhatsApp with your area
+                    We&apos;ll open WhatsApp with your area
                     filled in — just hit send.
                   </p>
                 </div>
@@ -1475,53 +1434,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* FAQ                                                              */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section
-          id="faq"
-          className="px-5 py-28 lg:px-8"
-        >
-          <div className="mx-auto max-w-[900px]">
-            <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#70915f]">
-                Questions
-              </p>
-
-              <h2 className="mt-3 text-4xl font-bold tracking-tight">
-                Frequently asked questions
-              </h2>
-
-              <p className="mt-4 text-[#6c796f]">
-                Everything you need to know about ordering
-                from Amruta Dhaanya.
-              </p>
-            </div>
-
-            <Accordion
-              type="single"
-              collapsible
-              className="mt-12"
-            >
-              {faqs.map((faq, index) => (
-                <AccordionItem
-                  key={faq.question}
-                  value={`faq-${index}`}
-                  className="border-[#dce5d8]"
-                >
-                  <AccordionTrigger className="py-6 text-left text-base font-semibold hover:no-underline">
-                    {faq.question}
-                  </AccordionTrigger>
-
-                  <AccordionContent className="pb-6 text-base leading-7 text-[#68766d]">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </section>
+    
       </div>
 
       {/* ------------------------------------------------------------------ */}
@@ -1582,7 +1495,7 @@ export default function Home() {
                 </Link>
 
                 <Link href="#fresh">
-                  Today's Fresh List
+                  Today&apos;s Fresh List
                 </Link>
 
                 <Link href="#products">
@@ -1613,8 +1526,8 @@ export default function Home() {
                   Become a Grower
                 </Link>
 
-                <Link href="#faq">
-                  FAQs
+                <Link href="/FAQ">
+                  FAQ
                 </Link>
 
                 <Link href="#home">

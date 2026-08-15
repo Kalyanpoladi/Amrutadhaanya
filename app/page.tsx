@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Check,
@@ -35,28 +36,6 @@ import {
 /* -------------------------------------------------------------------------- */
 /* BRAND                                                                      */
 /* -------------------------------------------------------------------------- */
-
-const brand = {
-  forest: "#183F2A",
-  forestDark: "#10301F",
-  forestLight: "#28583B",
-
-  sage: "#738B72",
-  sageLight: "#E7EEE3",
-
-  ivory: "#F8F5EC",
-  cream: "#FCFAF4",
-
-  gold: "#C6A15B",
-  goldLight: "#F1E7CC",
-
-  terracotta: "#A76545",
-  terracottaLight: "#F2E1D8",
-
-  text: "#203128",
-  muted: "#68766C",
-  border: "#DCE4D8",
-};
 
 /* -------------------------------------------------------------------------- */
 /* DATA                                                                       */
@@ -165,22 +144,8 @@ const faqs = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/* REUSABLE BUTTON STYLES                                                     */
+/* BUTTON STYLES                                                              */
 /* -------------------------------------------------------------------------- */
-
-/*
-  IMPORTANT:
-  These are the new visible/light-green CTA styles.
-
-  Instead of:
-  bg-[#183F2A] + black/default text
-
-  we use:
-  bg-[#D5E2D0] + text-[#183F2A]
-
-  This makes the text clearly visible while keeping the same
-  Amruta Dhaanya color family.
-*/
 
 const lightGreenButton =
   "bg-[#D5E2D0] text-[#183F2A] border border-[#BFD0BA] shadow-[0_10px_28px_rgba(24,63,42,.10)] transition-all hover:bg-[#C7D8C1] hover:text-[#183F2A] hover:shadow-[0_14px_35px_rgba(24,63,42,.16)]";
@@ -297,7 +262,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F8F5EC] text-[#203128]">
       {/* ------------------------------------------------------------------ */}
-      {/* ACCESSIBILITY                                                      */}
+      {/* ACCESSIBILITY                                                       */}
       {/* ------------------------------------------------------------------ */}
 
       <div className="sr-only focus-within:not-sr-only">
@@ -348,11 +313,13 @@ export default function Home() {
               }}
               className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-[#D8E6D5]"
             >
-              <img
-                src="/amruta-dhaanya-logo.png"
-                alt="Amruta Dhaanya"
-                className="h-full w-full object-contain p-1"
-              />
+              <Image
+            src="/amruta-dhaanya-logo.png"
+            alt="Amruta Dhaanya"
+            width={48}
+            height={48}
+            className="h-full w-full object-contain p-1"
+            />
             </motion.div>
 
             <div>
@@ -385,7 +352,6 @@ export default function Home() {
           <div className="hidden items-center gap-3 lg:flex">
             <AccountMenu />
 
-            {/* Cart intentionally stays dark green */}
             <Button
               className={`h-10 rounded-full px-5 text-sm font-semibold ${darkGreenButton}`}
               asChild
@@ -466,8 +432,6 @@ export default function Home() {
           id="home"
           className="relative overflow-hidden bg-[#F8F5EC]"
         >
-          {/* Decorative background */}
-
           <div className="pointer-events-none absolute -right-40 top-20 h-[500px] w-[500px] rounded-full bg-[#E7EEE3] blur-3xl" />
 
           <div className="pointer-events-none absolute -left-40 bottom-0 h-[400px] w-[400px] rounded-full bg-[#F1E7CC]/50 blur-3xl" />
@@ -561,8 +525,6 @@ export default function Home() {
                 }}
                 className="mt-9 flex flex-col gap-3 sm:flex-row"
               >
-                {/* LIGHT GREEN PRIMARY CTA */}
-
                 <Button
                   size="lg"
                   className={`h-[52px] rounded-full px-7 font-semibold ${lightGreenButton}`}
@@ -573,8 +535,6 @@ export default function Home() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-
-                {/* SOFT GREEN SECONDARY CTA */}
 
                 <Button
                   size="lg"
@@ -644,15 +604,13 @@ export default function Home() {
                 className="relative rounded-[42px] bg-[#E5ECDD] p-4 shadow-[0_35px_100px_rgba(24,63,42,.14)]"
               >
                 <div className="relative min-h-[500px] overflow-hidden rounded-[34px] bg-[#D5E1CF] p-7">
-                  {/* decorative circles */}
-
                   <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/40" />
 
                   <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full border border-white/30" />
 
                   <div className="relative flex items-center justify-between">
                     <Badge className="rounded-full border border-white/60 bg-white/80 px-4 py-2 text-[#28583B] shadow-none backdrop-blur">
-                      Today's harvest
+                      Today&apos;s harvest
                     </Badge>
 
                     <motion.div
@@ -743,7 +701,7 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Floating card */}
+              {/* FLOATING CARD */}
 
               <motion.div
                 animate={{
@@ -833,7 +791,7 @@ export default function Home() {
         </section>
 
         {/* ---------------------------------------------------------------- */}
-        {/* SEARCH                                                            */}
+        {/* SEARCH                                                             */}
         {/* ---------------------------------------------------------------- */}
 
         <section className="bg-[#F8F5EC] px-5 py-24 lg:px-8">
@@ -875,8 +833,6 @@ export default function Home() {
                   placeholder="Search vegetables, fruits, groceries..."
                   className="h-16 rounded-full border-[#D8E2D3] bg-white pl-14 pr-28 text-base shadow-[0_15px_45px_rgba(24,63,42,.07)] focus-visible:ring-[#28583B]"
                 />
-
-                {/* Search button changed to light green */}
 
                 <Button
                   className="absolute right-2 top-2 h-12 rounded-full bg-[#D5E2D0] px-6 font-semibold text-[#183F2A] shadow-sm hover:bg-[#C7D8C1] hover:text-[#183F2A]"
@@ -999,8 +955,6 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Light green button */}
-
               <Button
                 variant="outline"
                 className={`w-fit rounded-full ${softGreenButton}`}
@@ -1111,8 +1065,6 @@ export default function Home() {
                             </span>
                           </div>
 
-                          {/* Product icon button remains dark green */}
-
                           <Button
                             size="icon"
                             className="h-11 w-11 rounded-full bg-[#183F2A] text-white shadow-md transition-transform group-hover:scale-110 hover:bg-[#10301F] hover:text-white"
@@ -1173,8 +1125,6 @@ export default function Home() {
                 local fresh-food network for both growers
                 and families.
               </p>
-
-              {/* THIS IS THE BUTTON YOU WERE TALKING ABOUT */}
 
               <Button
                 className={`mt-8 rounded-full px-6 font-semibold ${lightGreenButton}`}
@@ -1265,14 +1215,14 @@ export default function Home() {
               </SectionLabel>
 
               <h2 className="mt-4 text-4xl font-semibold leading-[1.08] tracking-[-0.045em] text-[#183F2A] sm:text-5xl">
-                Real availability. Private sellers. Nothing promised until it's confirmed.
+                Real availability. Private sellers. Nothing promised until it&apos;s confirmed.
               </h2>
 
               <p className="mt-5 text-lg leading-8 text-[#66756B]">
-                We don't stock a warehouse and we don't
+                We don&apos;t stock a warehouse and we don&apos;t
                 promise everything, every day. Every item
                 comes from a registered local seller, is
-                checked for basic freshness before it's
+                checked for basic freshness before it&apos;s
                 listed, and is confirmed with you before
                 anything is processed or paid for.
               </p>
@@ -1288,7 +1238,7 @@ export default function Home() {
                 [
                   "02",
                   "Checked Before Listing",
-                  "Poor-quality or damaged items simply aren't listed. What's available is what genuinely passed a basic freshness check.",
+                  "Poor-quality or damaged items simply aren&apos;t listed. What&apos;s available is what genuinely passed a basic freshness check.",
                 ],
                 [
                   "03",
@@ -1365,8 +1315,6 @@ export default function Home() {
             </div>
 
             <div className="relative mt-16 grid gap-12 md:grid-cols-3">
-              {/* connector */}
-
               <div className="absolute left-[17%] right-[17%] top-10 hidden h-px bg-[#D5DFD1] md:block" />
 
               {[
@@ -1374,7 +1322,7 @@ export default function Home() {
                   "01",
                   Search,
                   "Browse & Order",
-                  "Choose from today's available products or select a planned weekly basket.",
+                  "Choose from today&apos;s available products or select a planned weekly basket.",
                 ],
                 [
                   "02",
@@ -1432,114 +1380,108 @@ export default function Home() {
           </div>
         </section>
 
-    {/* ---------------------------------------------------------------- */}
-/* DELIVERY                                                          */
-{/* ---------------------------------------------------------------- */}
+        {/* ---------------------------------------------------------------- */}
+        {/* DELIVERY                                                           */}
+        {/* ---------------------------------------------------------------- */}
 
-<section className="bg-[#F8F5EC] px-5 pb-28 lg:px-8">
-  <div className="mx-auto max-w-[1320px]">
-    <motion.div
-      whileHover={{
-        scale: 1.005,
-      }}
-      className="overflow-hidden rounded-[40px] bg-[#E3EBDD] shadow-[0_12px_45px_rgba(24,63,42,.06)]"
-    >
-      <div className="grid lg:grid-cols-2">
-
-        {/* LEFT SIDE */}
-
-        <div className="p-8 sm:p-12 lg:p-16">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FCFAF4] text-[#28583B]">
-            <MapPin />
-          </div>
-
-          <h2 className="mt-7 max-w-lg text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-[#183F2A]">
-            Not sure if we deliver to your area?
-          </h2>
-
-          <p className="mt-5 max-w-lg leading-7 text-[#617268]">
-            We are currently testing delivery and
-            pickup support in selected areas of
-            Warangal, Hanamkonda, Kazipet and
-            nearby local communities.
-          </p>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-
-            <Input
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-              placeholder="Enter your area or pincode"
-              className="h-12 rounded-full border-white bg-white focus-visible:ring-[#28583B]"
-            />
-
-            <Button
-              type="button"
-              className="h-12 shrink-0 rounded-full bg-[#183F2A] px-6 text-white transition-all hover:bg-[#28583B]"
-              onClick={() => {
-                const phoneNumber = "919177751088";
-
-                const message = area.trim()
-                  ? `Hi Amruta Dhaanya, I would like to check delivery availability for ${area.trim()}.`
-                  : "Hi Amruta Dhaanya, I would like to check delivery availability in my area.";
-
-                const whatsappUrl =
-                  `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-
-                window.location.href = whatsappUrl;
+        <section className="bg-[#F8F5EC] px-5 pb-28 lg:px-8">
+          <div className="mx-auto max-w-[1320px]">
+            <motion.div
+              whileHover={{
+                scale: 1.005,
               }}
+              className="overflow-hidden rounded-[40px] bg-[#E3EBDD] shadow-[0_12px_45px_rgba(24,63,42,.06)]"
             >
-              Check on WhatsApp
-            </Button>
+              <div className="grid lg:grid-cols-2">
+                {/* LEFT SIDE */}
 
+                <div className="p-8 sm:p-12 lg:p-16">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FCFAF4] text-[#28583B]">
+                    <MapPin />
+                  </div>
+
+                  <h2 className="mt-7 max-w-lg text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-[#183F2A]">
+                    Not sure if we deliver to your area?
+                  </h2>
+
+                  <p className="mt-5 max-w-lg leading-7 text-[#617268]">
+                    We are currently testing delivery and
+                    pickup support in selected areas of
+                    Warangal, Hanamkonda, Kazipet and
+                    nearby local communities.
+                  </p>
+
+                  <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <Input
+                      value={area}
+                      onChange={(e) =>
+                        setArea(e.target.value)
+                      }
+                      placeholder="Enter your area or pincode"
+                      className="h-12 rounded-full border-white bg-white focus-visible:ring-[#28583B]"
+                    />
+
+                    <Button
+                      type="button"
+                      className="h-12 shrink-0 rounded-full bg-[#183F2A] px-6 text-white transition-all hover:bg-[#28583B]"
+                      onClick={() => {
+                        const phoneNumber = "919177751088";
+
+                        const message = area.trim()
+                          ? `Hi Amruta Dhaanya, I would like to check delivery availability for ${area.trim()}.`
+                          : "Hi Amruta Dhaanya, I would like to check delivery availability in my area.";
+
+                        const whatsappUrl =
+                          `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+                        window.location.href = whatsappUrl;
+                      }}
+                    >
+                      Check on WhatsApp
+                    </Button>
+                  </div>
+
+                  <p className="mt-3 text-xs text-[#748279]">
+                    We&apos;ll open WhatsApp with your area filled
+                    in — just hit send.
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE */}
+
+                <div className="relative min-h-[380px] overflow-hidden bg-[#CBDABE]">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.05, 1],
+                      rotate: [0, 1, 0],
+                    }}
+                    transition={{
+                      duration: 8,
+                      repeat: Infinity,
+                    }}
+                    className="absolute inset-10 rounded-[30px] border border-white/50 bg-white/20"
+                  />
+
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-8xl">
+                        📍
+                      </div>
+
+                      <div className="mt-4 text-2xl font-semibold text-[#345E3C]">
+                        Warangal
+                      </div>
+
+                      <div className="mt-1 text-sm text-[#617968]">
+                        Hanamkonda · Kazipet · Nearby
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-
-          <p className="mt-3 text-xs text-[#748279]">
-            We'll open WhatsApp with your area filled
-            in — just hit send.
-          </p>
-        </div>
-
-        {/* RIGHT SIDE */}
-
-        <div className="relative min-h-[380px] overflow-hidden bg-[#CBDABE]">
-
-          <motion.div
-            animate={{
-              scale: [1, 1.05, 1],
-              rotate: [0, 1, 0],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-            }}
-            className="absolute inset-10 rounded-[30px] border border-white/50 bg-white/20"
-          />
-
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-
-              <div className="text-8xl">
-                📍
-              </div>
-
-              <div className="mt-4 text-2xl font-semibold text-[#345E3C]">
-                Warangal
-              </div>
-
-              <div className="mt-1 text-sm text-[#617968]">
-                Hanamkonda · Kazipet · Nearby
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </motion.div>
-  </div>
-</section>
+        </section>
 
         {/* ---------------------------------------------------------------- */}
         {/* GROWERS                                                           */}
@@ -1570,8 +1512,6 @@ export default function Home() {
                 creates a simple path for genuine local
                 supply to reach nearby households.
               </p>
-
-              {/* Light button on dark background */}
 
               <Button
                 size="lg"
@@ -1662,11 +1602,13 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-3">
                 <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-white/20">
-                  <img
-                    src="/amruta-dhaanya-logo.png"
-                    alt="Amruta Dhaanya"
-                    className="h-full w-full object-contain p-1"
-                  />
+                  <Image
+                  src="/amruta-dhaanya-logo.png"
+                  alt="Amruta Dhaanya"
+                  width={56}
+                  height={56}
+                  className="h-full w-full object-contain p-1"
+                />
                 </div>
 
                 <div>
@@ -1722,7 +1664,7 @@ export default function Home() {
                   href="#fresh"
                   className="transition-colors hover:text-white"
                 >
-                  Today's Fresh List
+                  Today&apos;s Fresh List
                 </Link>
 
                 <Link
@@ -1733,10 +1675,10 @@ export default function Home() {
                 </Link>
 
                 <Link
-                 href="/share-your-harvest"
-                 className="transition-colors hover:text-white"
+                  href="/share-your-harvest"
+                  className="transition-colors hover:text-white"
                 >
-                 Share Your Harvest
+                  Share Your Harvest
                 </Link>
 
                 <Link
@@ -1757,10 +1699,10 @@ export default function Home() {
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#B7C4B9]">
                 <Link
-                href="/Participate"
-               className="transition-colors hover:text-white"
+                  href="/Participate"
+                  className="transition-colors hover:text-white"
                 >
-                Participate
+                  Participate
                 </Link>
 
                 <Link
@@ -1771,10 +1713,10 @@ export default function Home() {
                 </Link>
 
                 <Link
-                  href="#faq"
+                  href="/FAQ"
                   className="transition-colors hover:text-white"
                 >
-                  FAQs
+                  FAQ
                 </Link>
 
                 <Link

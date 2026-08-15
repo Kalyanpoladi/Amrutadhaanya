@@ -77,7 +77,7 @@ export default function CartPage() {
             </h1>
 
             <p className="mt-4 leading-7 text-[#69776e]">
-              Your local harvest basket is waiting. Explore today's
+              Your local harvest basket is waiting. Explore today&apos;s
               available products and add something fresh.
             </p>
 

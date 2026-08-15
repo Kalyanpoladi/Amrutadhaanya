@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -24,12 +29,11 @@ import {
 
 import { createClient } from "@/lib/supabase/client";
 
-type AccountType =
-  | "admin"
-  | "customer"
-  | "grower"
-  | "both"
-  | "unknown";
+const supabase = createClient();
+
+/* ============================================================
+   TYPES
+============================================================ */
 
 type AdminProfile = {
   id: string;
@@ -82,8 +86,17 @@ type GrowerVerification = {
 
 type ActiveRole = "customer" | "grower";
 
+type VerificationStatus = {
+  title: string;
+  description: string;
+  type: "success" | "error" | "pending";
+};
+
+/* ============================================================
+   ACCOUNT PAGE
+============================================================ */
+
 export default function AccountPage() {
-  const supabase = createClient();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -91,32 +104,24 @@ export default function AccountPage() {
 
   const [userEmail, setUserEmail] = useState("");
 
-  const [admin, setAdmin] =
-    useState<AdminProfile | null>(null);
-
+  const [admin, setAdmin] = useState<AdminProfile | null>(null);
   const [customer, setCustomer] =
     useState<CustomerProfile | null>(null);
-
   const [grower, setGrower] =
     useState<GrowerProfile | null>(null);
-
   const [verification, setVerification] =
     useState<GrowerVerification | null>(null);
-
-  const [accountType, setAccountType] =
-    useState<AccountType>("unknown");
 
   const [activeRole, setActiveRole] =
     useState<ActiveRole>("customer");
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    loadAccount();
-  }, []);
+  /* ============================================================
+     LOAD ACCOUNT
+  ============================================================ */
 
-  async function loadAccount() {
+  const loadAccount = useCallback(async () => {
     setLoading(true);
     setErrorMessage("");
 
@@ -124,26 +129,36 @@ export default function AccountPage() {
     setCustomer(null);
     setGrower(null);
     setVerification(null);
-    setAccountType("unknown");
+    setActiveRole("customer");
 
     try {
+      /* ----------------------------------------------------------
+         AUTH USER
+      ---------------------------------------------------------- */
+
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError || !user) {
+      if (userError) {
+        console.error("Authentication error:", userError);
+        router.replace("/login");
+        return;
+      }
+
+      if (!user) {
         router.replace("/login");
         return;
       }
 
       setUserEmail(user.email ?? "");
 
-      /*
-       * ADMIN CHECK FIRST
-       *
-       * Administrators always have priority.
-       */
+      /* ----------------------------------------------------------
+         ADMIN CHECK
+         Administrators always have priority.
+      ---------------------------------------------------------- */
+
       const {
         data: adminData,
         error: adminError,
@@ -173,14 +188,13 @@ export default function AccountPage() {
 
       if (adminData) {
         setAdmin(adminData as AdminProfile);
-        setAccountType("admin");
-        setLoading(false);
         return;
       }
 
-      /*
-       * CUSTOMER
-       */
+      /* ----------------------------------------------------------
+         CUSTOMER PROFILE
+      ---------------------------------------------------------- */
+
       const {
         data: customerData,
         error: customerError,
@@ -217,9 +231,10 @@ export default function AccountPage() {
         );
       }
 
-      /*
-       * GROWER
-       */
+      /* ----------------------------------------------------------
+         GROWER PROFILE
+      ---------------------------------------------------------- */
+
       const {
         data: growerData,
         error: growerError,
@@ -258,6 +273,10 @@ export default function AccountPage() {
           growerData as GrowerProfile,
         );
 
+        /* --------------------------------------------------------
+           LATEST GROWER VERIFICATION
+        -------------------------------------------------------- */
+
         const {
           data: verificationData,
           error: verificationError,
@@ -271,10 +290,7 @@ export default function AccountPage() {
               verification_notes
             `,
           )
-          .eq(
-            "grower_id",
-            growerData.id,
-          )
+          .eq("grower_id", growerData.id)
           .order("created_at", {
             ascending: false,
           })
@@ -295,17 +311,16 @@ export default function AccountPage() {
         }
       }
 
+      /* ----------------------------------------------------------
+         DETERMINE ACTIVE ROLE
+      ---------------------------------------------------------- */
+
       if (customerData && growerData) {
-        setAccountType("both");
         setActiveRole("customer");
       } else if (customerData) {
-        setAccountType("customer");
         setActiveRole("customer");
       } else if (growerData) {
-        setAccountType("grower");
         setActiveRole("grower");
-      } else {
-        setAccountType("unknown");
       }
     } catch (error) {
       console.error(
@@ -319,18 +334,57 @@ export default function AccountPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [router]);
+
+  /* ============================================================
+     INITIAL LOAD
+  ============================================================ */
+
+  useEffect(() => {
+  const timer = window.setTimeout(() => {
+    void loadAccount();
+  }, 0);
+
+  return () => {
+    window.clearTimeout(timer);
+  };
+}, [loadAccount]);
+
+  /* ============================================================
+     LOGOUT
+  ============================================================ */
 
   async function logout() {
+    if (loggingOut) {
+      return;
+    }
+
     setLoggingOut(true);
     setErrorMessage("");
 
-    const { error } =
-      await supabase.auth.signOut();
+    try {
+      const { error } =
+        await supabase.auth.signOut();
 
-    if (error) {
+      if (error) {
+        console.error(
+          "Logout error:",
+          error,
+        );
+
+        setErrorMessage(
+          "Could not log out. Please try again.",
+        );
+
+        setLoggingOut(false);
+        return;
+      }
+
+      router.replace("/");
+      router.refresh();
+    } catch (error) {
       console.error(
-        "Logout error:",
+        "Unexpected logout error:",
         error,
       );
 
@@ -339,14 +393,14 @@ export default function AccountPage() {
       );
 
       setLoggingOut(false);
-      return;
     }
-
-    router.replace("/");
-    router.refresh();
   }
 
-  function getVerificationStatus() {
+  /* ============================================================
+     VERIFICATION STATUS
+  ============================================================ */
+
+  function getVerificationStatus(): VerificationStatus | null {
     if (!grower) {
       return null;
     }
@@ -355,8 +409,7 @@ export default function AccountPage() {
       return {
         title: "Verified Grower",
         description: `Your grower account is approved. Official ID: ${
-          grower.grower_code ||
-          "Not assigned"
+          grower.grower_code || "Not assigned"
         }`,
         type: "success",
       };
@@ -380,11 +433,9 @@ export default function AccountPage() {
     };
   }
 
-  /*
-   * ============================================================
-   * LOADING
-   * ============================================================
-   */
+  /* ============================================================
+     LOADING
+  ============================================================ */
 
   if (loading) {
     return (
@@ -411,28 +462,31 @@ export default function AccountPage() {
     );
   }
 
+  /* ============================================================
+     DERIVED STATE
+  ============================================================ */
+
   const verificationStatus =
     getVerificationStatus();
 
-  const hasCustomer = !!customer;
-  const hasGrower = !!grower;
-  const isAdmin = !!admin;
+  const hasCustomer = customer !== null;
+  const hasGrower = grower !== null;
+  const isAdmin = admin !== null;
+
+  /* ============================================================
+     MAIN PAGE
+  ============================================================ */
 
   return (
     <>
-      {/* =====================================================
-          ORIGINAL SITE HEADER
-      ====================================================== */}
-
       <SiteHeader />
 
       <main className="relative min-h-screen overflow-hidden bg-[#fbfcf8]">
+        {/* ------------------------------------------------------
+           BACKGROUND
+        ------------------------------------------------------ */}
 
-        {/* =====================================================
-            LUMINOUS PAGE BACKGROUND
-        ====================================================== */}
-
-        <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div className="absolute -left-32 top-32 h-96 w-96 rounded-full bg-[#c9f5a9]/35 blur-[100px]" />
 
           <div className="absolute right-[-120px] top-40 h-[500px] w-[500px] rounded-full bg-[#a8eb78]/25 blur-[120px]" />
@@ -441,10 +495,9 @@ export default function AccountPage() {
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-[1180px] px-5 pb-16 pt-10 sm:px-8 lg:px-10">
-
-          {/* =================================================
-              TOP AREA
-          ================================================== */}
+          {/* ----------------------------------------------------
+             TOP AREA
+          ---------------------------------------------------- */}
 
           <div className="flex flex-col justify-between gap-7 sm:flex-row sm:items-end">
             <div>
@@ -452,9 +505,7 @@ export default function AccountPage() {
                 href="/"
                 className="group inline-flex items-center gap-2 text-sm font-semibold text-[#27683a] transition hover:text-[#174f2a]"
               >
-                <ArrowLeft
-                  className="h-4 w-4 transition-transform group-hover:-translate-x-1"
-                />
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
 
                 Back to Amruta Dhaanya
               </Link>
@@ -513,9 +564,9 @@ export default function AccountPage() {
             </button>
           </div>
 
-          {/* =================================================
-              ERROR
-          ================================================== */}
+          {/* ----------------------------------------------------
+             ERROR
+          ---------------------------------------------------- */}
 
           {errorMessage && (
             <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -523,9 +574,9 @@ export default function AccountPage() {
             </div>
           )}
 
-          {/* =================================================
-              ADMIN
-          ================================================== */}
+          {/* ====================================================
+             ADMIN
+          ==================================================== */}
 
           {isAdmin && admin && (
             <>
@@ -651,8 +702,7 @@ export default function AccountPage() {
                     text="Open the Amruta Dhaanya administrator area."
                   />
 
-                  {admin.role ===
-                  "super_admin" ? (
+                  {admin.role === "super_admin" ? (
                     <QuickAction
                       href="/admin/admins"
                       icon={<Users />}
@@ -705,9 +755,9 @@ export default function AccountPage() {
             </>
           )}
 
-          {/* =================================================
-              CUSTOMER / GROWER SWITCHER
-          ================================================== */}
+          {/* ====================================================
+             CUSTOMER / GROWER SWITCHER
+          ==================================================== */}
 
           {!isAdmin &&
             hasCustomer &&
@@ -747,14 +797,16 @@ export default function AccountPage() {
               </section>
             )}
 
-          {/* =================================================
-              CUSTOMER
-          ================================================== */}
+          {/* ====================================================
+             CUSTOMER
+          ==================================================== */}
 
           {!isAdmin &&
             activeRole === "customer" &&
             customer && (
               <>
+                {/* CUSTOMER HERO */}
+
                 <section className="relative mt-8 overflow-hidden rounded-[34px] border border-[#d9ecd0] bg-white/90 p-7 shadow-[0_18px_60px_rgba(44,104,49,0.10)] backdrop-blur sm:p-9">
                   <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#d5f7bd]/60 blur-3xl" />
 
@@ -785,6 +837,8 @@ export default function AccountPage() {
                     </span>
                   </div>
                 </section>
+
+                {/* CUSTOMER DETAILS */}
 
                 <section className="mt-6 rounded-[34px] border border-[#dcebd6] bg-white/90 p-7 shadow-[0_18px_60px_rgba(44,104,49,0.08)] backdrop-blur sm:p-9">
                   <SectionTitle
@@ -873,6 +927,8 @@ export default function AccountPage() {
                   </div>
                 </section>
 
+                {/* CUSTOMER QUICK ACTIONS */}
+
                 <section className="mt-6 grid gap-4 sm:grid-cols-3">
                   <QuickAction
                     href="/products"
@@ -885,7 +941,7 @@ export default function AccountPage() {
                     href="/cart"
                     icon={<ShoppingCart />}
                     title="My Cart"
-                    text="View products you've selected."
+                    text="View products you&apos;ve selected."
                   />
 
                   <QuickAction
@@ -898,14 +954,16 @@ export default function AccountPage() {
               </>
             )}
 
-          {/* =================================================
-              GROWER
-          ================================================== */}
+          {/* ====================================================
+             GROWER
+          ==================================================== */}
 
           {!isAdmin &&
             activeRole === "grower" &&
             grower && (
               <>
+                {/* GROWER HERO */}
+
                 <section className="relative mt-8 overflow-hidden rounded-[34px] border border-[#e7dec8] bg-white/90 p-7 shadow-[0_18px_60px_rgba(92,82,43,0.08)] backdrop-blur sm:p-9">
                   <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
                     <div className="flex gap-5">
@@ -945,6 +1003,8 @@ export default function AccountPage() {
                   </div>
                 </section>
 
+                {/* VERIFICATION STATUS */}
+
                 {verificationStatus && (
                   <section
                     className={`mt-6 rounded-[25px] border px-6 py-5 ${
@@ -979,6 +1039,8 @@ export default function AccountPage() {
                     </div>
                   </section>
                 )}
+
+                {/* GROWER DETAILS */}
 
                 <section className="mt-6 rounded-[34px] border border-[#dcebd6] bg-white/90 p-7 shadow-[0_18px_60px_rgba(44,104,49,0.08)] backdrop-blur sm:p-9">
                   <SectionTitle
@@ -1066,6 +1128,8 @@ export default function AccountPage() {
                   </div>
                 </section>
 
+                {/* WHAT HAPPENS NEXT */}
+
                 {!grower.grower_code && (
                   <section className="relative mt-6 overflow-hidden rounded-[32px] border border-[#d8edce] bg-gradient-to-br from-[#edf9e8] to-[#f9fcf7] p-7 sm:p-9">
                     <h3 className="text-xl font-bold text-[#174f2a]">
@@ -1110,6 +1174,8 @@ export default function AccountPage() {
                   </section>
                 )}
 
+                {/* GROWER QUICK ACTIONS */}
+
                 <section className="mt-6 grid gap-4 sm:grid-cols-2">
                   <QuickAction
                     href="/share-your-harvest"
@@ -1128,9 +1194,9 @@ export default function AccountPage() {
               </>
             )}
 
-          {/* =================================================
-              NO PROFILE
-          ================================================== */}
+          {/* ====================================================
+             NO PROFILE
+          ==================================================== */}
 
           {!isAdmin &&
             !hasCustomer &&
@@ -1151,17 +1217,19 @@ export default function AccountPage() {
 
                 <button
                   type="button"
-                  onClick={loadAccount}
-                  className="mt-6 rounded-full bg-[#28753a] px-6 py-3 text-sm font-bold text-white shadow-[0_8px_25px_rgba(40,117,58,0.20)] hover:bg-[#1e602e]"
+                  onClick={() =>
+                    void loadAccount()
+                  }
+                  className="mt-6 rounded-full bg-[#28753a] px-6 py-3 text-sm font-bold text-white shadow-[0_8px_25px_rgba(40,117,58,0.20)] transition hover:bg-[#1e602e]"
                 >
                   Refresh Account
                 </button>
               </section>
             )}
 
-          {/* =================================================
-              FOOTER
-          ================================================== */}
+          {/* ====================================================
+             FOOTER
+          ==================================================== */}
 
           <footer className="mt-16 pb-4 pt-8 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[#cce8c0] bg-white shadow-[0_0_30px_rgba(127,205,83,0.25)]">
@@ -1179,7 +1247,7 @@ export default function AccountPage() {
               <span className="mx-2 text-[#9bad9c]">
                 ·
               </span>
-              An Ahaar Kutumbam Initiative
+              Ahaar Kutumbam Initiative
             </p>
 
             <p className="mx-auto mt-2 max-w-lg text-xs leading-6 text-[#89958c]">
@@ -1194,22 +1262,15 @@ export default function AccountPage() {
   );
 }
 
-/*
-============================================================
-SITE HEADER
-============================================================
-*/
+/* ============================================================
+   SITE HEADER
+============================================================ */
 
 function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#dcebd6] bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-[78px] w-full max-w-[1280px] items-center justify-between gap-6 px-5 sm:px-8 lg:px-10">
-
-        {/* =====================================================
-            ORIGINAL LOGO
-            Uses:
-            /public/amruta-dhaanya-logo.png
-        ====================================================== */}
+        {/* LOGO */}
 
         <Link
           href="/"
@@ -1237,9 +1298,7 @@ function SiteHeader() {
           </div>
         </Link>
 
-        {/* =====================================================
-            NAVIGATION
-        ====================================================== */}
+        {/* NAVIGATION */}
 
         <nav className="hidden items-center gap-7 lg:flex">
           <NavLink href="/">
@@ -1267,9 +1326,7 @@ function SiteHeader() {
           </NavLink>
         </nav>
 
-        {/* =====================================================
-            RIGHT SIDE
-        ====================================================== */}
+        {/* RIGHT SIDE */}
 
         <div className="flex items-center gap-3">
           <Link
@@ -1297,18 +1354,16 @@ function SiteHeader() {
   );
 }
 
-/*
-============================================================
-NAV LINK
-============================================================
-*/
+/* ============================================================
+   NAV LINK
+============================================================ */
 
 function NavLink({
   href,
   children,
 }: {
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <Link
@@ -1320,18 +1375,16 @@ function NavLink({
   );
 }
 
-/*
-============================================================
-SECTION TITLE
-============================================================
-*/
+/* ============================================================
+   SECTION TITLE
+============================================================ */
 
 function SectionTitle({
   icon,
   eyebrow,
   title,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   eyebrow: string;
   title: string;
 }) {
@@ -1354,11 +1407,9 @@ function SectionTitle({
   );
 }
 
-/*
-============================================================
-INFO ITEM
-============================================================
-*/
+/* ============================================================
+   INFO ITEM
+============================================================ */
 
 function InfoItem({
   icon,
@@ -1366,7 +1417,7 @@ function InfoItem({
   value,
   status,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
   status?: "active";
@@ -1396,11 +1447,9 @@ function InfoItem({
   );
 }
 
-/*
-============================================================
-QUICK ACTION
-============================================================
-*/
+/* ============================================================
+   QUICK ACTION
+============================================================ */
 
 function QuickAction({
   href,
@@ -1409,7 +1458,7 @@ function QuickAction({
   text,
 }: {
   href: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   text: string;
 }) {
@@ -1439,15 +1488,13 @@ function QuickAction({
   );
 }
 
-/*
-============================================================
-DATE FORMATTER
-============================================================
-*/
+/* ============================================================
+   DATE FORMATTER
+============================================================ */
 
 function formatDate(
   date: string | null | undefined,
-) {
+): string {
   if (!date) {
     return "Not available";
   }
@@ -1458,12 +1505,9 @@ function formatDate(
     return "Not available";
   }
 
-  return parsed.toLocaleDateString(
-    "en-IN",
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    },
-  );
+  return parsed.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }

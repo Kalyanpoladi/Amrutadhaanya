@@ -313,7 +313,7 @@ export default function JoinAsGrowerPage() {
             </h2>
 
             <p className="mt-5 text-lg leading-8 text-[#66756b]">
-              You don't need to be a large commercial farm. If you
+              You don&apos;t need to be a large commercial farm. If you
               genuinely grow or supply useful local produce and
               sometimes have surplus after your own household needs,
               you can submit your details for consideration.
@@ -491,7 +491,7 @@ export default function JoinAsGrowerPage() {
 
               <p className="mt-5 leading-7 text-[#66756b]">
                 Amruta Dhaanya is designed around real local
-                availability. We don't operate like a warehouse
+                availability. We don&apos;t operate like a warehouse
                 that guarantees every quantity from every seller.
               </p>
             </div>
@@ -651,7 +651,7 @@ export default function JoinAsGrowerPage() {
                   href="/#fresh"
                   className="transition-colors hover:text-white"
                 >
-                  Today's Fresh List
+                  Today&apos;sFresh List
                 </Link>
 
                 <Link

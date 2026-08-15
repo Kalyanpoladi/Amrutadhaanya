@@ -263,8 +263,8 @@ export default function AboutPage() {
             </p>
 
             <p className="mt-5 text-lg leading-8 text-[#66756b]">
-              That means we don't promise unlimited stock. We don't rely on
-              anonymous sellers. And we don't want customers paying for
+              That means we don&apos;t promise unlimited stock. We don&apos;t rely on
+              anonymous sellers. And we don&apos;t want customers paying for
               something before its availability is confirmed.
             </p>
           </motion.div>
@@ -436,7 +436,7 @@ export default function AboutPage() {
 
                 <p className="mt-6 text-lg leading-8 text-[#c8d9c4]">
                   Before payment, we confirm availability, final price and
-                  delivery. If something isn't available, we tell you
+                  delivery. If something isn&apos;t available, we tell you
                   honestly instead of making a promise we cannot keep.
                 </p>
               </div>

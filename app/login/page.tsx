@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const router = useRouter();
   const supabase = createClient();
 
   const [email, setEmail] = useState("");
@@ -17,9 +19,15 @@ export default function LoginPage() {
   // =========================================================
 
   async function loginWithEmail() {
+    if (loading) {
+      return;
+    }
+
     setErrorMessage("");
 
-    if (!email || !password) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
       setErrorMessage(
         "Please enter your email and password.",
       );
@@ -35,7 +43,7 @@ export default function LoginPage() {
 
       const { data, error } =
         await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
+          email: normalizedEmail,
           password,
         });
 
@@ -63,14 +71,21 @@ export default function LoginPage() {
         },
       );
 
-      const access = await response.json();
+      let access: {
+        isAdmin?: boolean;
+      } = {};
+
+      try {
+        access = await response.json();
+      } catch {
+        access = {};
+      }
 
       // -------------------------------------------------------
       // 3. ADMINISTRATORS CANNOT USE CUSTOMER LOGIN
       // -------------------------------------------------------
 
       if (response.ok && access.isAdmin) {
-        // Remove the authenticated session immediately.
         await supabase.auth.signOut();
 
         setErrorMessage(
@@ -84,7 +99,8 @@ export default function LoginPage() {
       // 4. NORMAL CUSTOMER
       // -------------------------------------------------------
 
-      window.location.href = "/account";
+      router.replace("/account");
+      router.refresh();
     } catch (error) {
       console.error(
         "Customer login error:",
@@ -106,6 +122,10 @@ export default function LoginPage() {
   // =========================================================
 
   async function loginWithGitHub() {
+    if (loading) {
+      return;
+    }
+
     setErrorMessage("");
     setLoading(true);
 
@@ -181,7 +201,10 @@ export default function LoginPage() {
           {/* Error message */}
 
           {errorMessage && (
-            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div
+              role="alert"
+              className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
               {errorMessage}
             </div>
           )}
@@ -235,7 +258,7 @@ export default function LoginPage() {
                 disabled={loading}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
-                    loginWithEmail();
+                    void loginWithEmail();
                   }
                 }}
                 className="h-12 w-full rounded-xl border border-[#d8e2d3] bg-white px-4 outline-none transition focus:border-[#477047] focus:ring-2 focus:ring-[#477047]/10 disabled:bg-gray-50"
@@ -246,7 +269,9 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={loginWithEmail}
+              onClick={() => {
+                void loginWithEmail();
+              }}
               disabled={loading}
               className="h-12 w-full rounded-full bg-[#2d6339] px-6 font-semibold text-white transition hover:bg-[#214e2d] disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -272,7 +297,9 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={loginWithGitHub}
+            onClick={() => {
+              void loginWithGitHub();
+            }}
             disabled={loading}
             className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#24292f] px-6 font-medium text-white transition hover:bg-[#1f2328] disabled:cursor-not-allowed disabled:opacity-60"
           >

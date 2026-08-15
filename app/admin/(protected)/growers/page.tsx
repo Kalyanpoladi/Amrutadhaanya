@@ -93,8 +93,59 @@ export default function GrowerVerificationPage() {
   }, []);
 
   useEffect(() => {
-    loadRegistrations();
-  }, [loadRegistrations]);
+  let cancelled = false;
+
+  async function load() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(
+        "/api/admin/growers/registrations",
+        {
+          method: "GET",
+          cache: "no-store",
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Unable to load grower registrations.",
+        );
+      }
+
+      if (!cancelled) {
+        setRegistrations(data.registrations ?? []);
+      }
+    } catch (err) {
+      console.error(
+        "Load grower registrations error:",
+        err,
+      );
+
+      if (!cancelled) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load registrations.",
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  }
+
+  load();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   // ---------------------------------------------------------
   // STEP 1: MATCH PHONE / EMAIL

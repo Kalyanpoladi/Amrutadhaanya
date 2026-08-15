@@ -49,6 +49,7 @@ export function CartProvider({
    * Load cart from localStorage once on the client.
    */
   useEffect(() => {
+  const loadCart = async () => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
 
@@ -65,7 +66,10 @@ export function CartProvider({
     } finally {
       setLoaded(true);
     }
-  }, []);
+  };
+
+  void loadCart();
+}, []);
 
   /*
    * Save cart whenever it changes.
@@ -178,18 +182,15 @@ export function CartProvider({
     );
   }, [items]);
 
-  const value = useMemo<CartContextType>(
-    () => ({
-      items,
-      addItem,
-      removeItem,
-      updateQuantity,
-      clearCart,
-      totalItems,
-      subtotal,
-    }),
-    [items, totalItems, subtotal]
-  );
+  const value: CartContextType = {
+  items,
+  addItem,
+  removeItem,
+  updateQuantity,
+  clearCart,
+  totalItems,
+  subtotal,
+};
 
   return (
     <CartContext.Provider value={value}>
