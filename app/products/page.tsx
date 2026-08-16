@@ -289,10 +289,10 @@ export default function Home() {
 
           <nav className="hidden items-center gap-8 lg:flex">
             {[
-              ["Home", "#home"],
+              ["Home", "/"],
               ["Today's Fresh List", "#fresh"],
-              ["Fresh Baskets", "#products"],
-              ["Share Your Harvest", "#growers"],
+              ["Fresh Baskets", "/products"],
+              ["Share Your Harvest", "/#growers"],
               ["About Us", "#about"],
             ].map(([label, href]) => (
               <Link
@@ -384,7 +384,7 @@ export default function Home() {
           >
             <div className="flex flex-col gap-4">
               {[
-                ["Home", "#home"],
+                ["Home", "/home"],
                 ["Today's Fresh List", "#fresh"],
                 ["Fresh Baskets", "#products"],
                 ["Share Your Harvest", "#growers"],
@@ -1490,7 +1490,7 @@ export default function Home() {
               </h3>
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#b7c4b9]">
-                <Link href="#home">
+                <Link href="/">
                   Home
                 </Link>
 
@@ -1518,8 +1518,8 @@ export default function Home() {
               </h3>
 
               <div className="mt-5 flex flex-col gap-3 text-sm text-[#b7c4b9]">
-                <Link href="#about">
-                  Our Purpose
+                <Link href="/participate">
+                  Participate
                 </Link>
 
                 <Link href="#growers">
@@ -1530,15 +1530,15 @@ export default function Home() {
                   FAQ
                 </Link>
 
-                <Link href="#home">
+                <Link href="/">
                   Contact Us
                 </Link>
 
-                <Link href="#home">
+                <Link href="/">
                   Legal & Policies
                 </Link>
 
-                <Link href="/cart">
+                <Link href="#cart">
                   Cart
                 </Link>
               </div>

@@ -1,360 +1,223 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { motion } from "motion/react";
 import {
   ArrowRight,
   Check,
-  Heart,
-  Leaf,
-  MapPin,
+  ChevronDown,
   Menu,
   Search,
-  ShieldCheck,
   ShoppingBag,
-  Sprout,
-  Truck,
   X,
 } from "lucide-react";
-import { motion, useScroll, useTransform } from "motion/react";
 
 import { AccountMenu } from "@/components/auth/account-menu";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-
-/* -------------------------------------------------------------------------- */
-/* BRAND                                                                      */
-/* -------------------------------------------------------------------------- */
-
-/* -------------------------------------------------------------------------- */
-/* DATA                                                                       */
-/* -------------------------------------------------------------------------- */
+const image1 = "/categories/Image 1.JPG";
+const image2 = "/categories/Image 2.JPG";
+const image3 = "/categories/Image 3.JPG";
 
 const categories = [
-  { name: "Vegetables", icon: "🥬" },
-  { name: "Fruits", icon: "🍎" },
-  { name: "Leafy Greens", icon: "🌿" },
-  { name: "Flowers", icon: "🌼" },
-  { name: "Sacred Greens", icon: "🌱" },
-  { name: "Grains", icon: "🌾" },
-  { name: "Pulses", icon: "🫘" },
-  { name: "Dairy", icon: "🥛" },
-];
-
-const trustItems = [
-  {
-    icon: ShieldCheck,
-    title: "Verified growers",
-    text: "Real local sellers",
-  },
-  {
-    icon: Check,
-    title: "Checked before listing",
-    text: "Basic freshness check",
-  },
-  {
-    icon: Heart,
-    title: "Confirmed before payment",
-    text: "No unwanted surprises",
-  },
-  {
-    icon: Leaf,
-    title: "No warehouse stock",
-    text: "Genuinely available",
-  },
+  { name: "Vegetables", image: "/images/vegetables.jpg" },
+  { name: "Fruits", image: "/images/fruits.jpg" },
+  { name: "Leafy Greens", image: "/images/leafy-greens.jpg" },
+  { name: "Flowers", image: "/images/flowers.jpg" },
+  { name: "Sacred Greens", image: "/images/sacred-greens.jpg" },
+  { name: "Grains", image: "/images/grains.jpg" },
+  { name: "Pulses", image: "/images/pulses.jpg" },
+  { name: "Dairy", image: "/images/dairy.jpg" },
 ];
 
 const products = [
   {
-    slug: "traditional-rice",
     name: "Traditional Rice",
     description:
-      "Naturally grown, hand-selected rice sourced directly from growers we work with regularly.",
+      "Naturally grown and sourced through growers we know.",
     price: "₹120",
-    unit: "/ kg",
-    emoji: "🌾",
-    accent: "gold",
+    unit: "per kg",
+    image: image1,
+    tag: "Local harvest",
   },
   {
-    slug: "traditional-millets",
     name: "Traditional Millets",
     description:
-      "Traditional grains grown with care and brought to nearby families through our local network.",
+      "Traditional grains brought to nearby families.",
     price: "₹150",
-    unit: "/ kg",
-    emoji: "🌾",
-    accent: "sage",
+    unit: "per kg",
+    image: image2,
+    tag: "Local harvest",
   },
   {
-    slug: "cold-pressed-oils",
     name: "Cold-Pressed Oils",
     description:
-      "Slow-extracted using traditional methods — no heat, no chemicals, no shortcuts.",
+      "Slow-extracted using traditional methods.",
     price: "₹280",
-    unit: "/ litre",
-    emoji: "🫒",
-    accent: "terracotta",
+    unit: "per litre",
+    image: image3,
+    tag: "Traditional",
   },
 ];
 
 const faqs = [
-  {
-    question:
-      "What is Ahaar Kutumbam and how is it different from Amruta Dhaanya?",
-    answer:
-      "Ahaar Kutumbam is the wider community initiative connecting growers, local agents and families. Amruta Dhaanya is the customer-facing marketplace built within that initiative.",
-  },
-  {
-    question:
-      "How do I know the products are genuinely traditional?",
-    answer:
-      "We work with registered local growers and sellers, check products before listing and confirm actual availability before an order is processed.",
-  },
-  {
-    question: "Where do you currently deliver?",
-    answer:
-      "We are currently testing delivery and pickup support in selected areas of Warangal, Hanamkonda, Kazipet and nearby local communities.",
-  },
-  {
-    question: "How fresh is the stock?",
-    answer:
-      "We don't operate like a warehouse-based quick-commerce service. Availability is based on what local growers genuinely have available.",
-  },
-  {
-    question: "How do I become a grower partner?",
-    answer:
-      "Use the Share Your Harvest section and submit your details. Our team will contact you, understand what you grow and guide you through registration.",
-  },
-  {
-    question: "What if a product I ordered isn't available?",
-    answer:
-      "We confirm availability, final price and delivery before processing. If something isn't available, we tell you before payment rather than after.",
-  },
+  [
+    "What is Ahaar Kutumbam and how is it different from Amruta Dhaanya?",
+    "Ahaar Kutumbam is the wider community initiative connecting growers, local agents and families. Amruta Dhaanya is the customer-facing marketplace built within that initiative.",
+  ],
+  [
+    "How do I know the products are genuinely traditional?",
+    "We work with registered local growers and sellers, check products before listing and confirm actual availability before an order is processed.",
+  ],
+  [
+    "Where do you currently deliver?",
+    "We are currently testing delivery and pickup support in selected areas of Warangal, Hanamkonda, Kazipet and nearby local communities.",
+  ],
+  [
+    "How fresh is the stock?",
+    "We do not operate like a warehouse-based quick-commerce service. Availability is based on what local growers genuinely have available.",
+  ],
+  [
+    "How do I become a grower partner?",
+    "Use the Share Your Harvest section and submit your details. Our team will contact you and guide you through registration.",
+  ],
+  [
+    "What if a product I ordered isn't available?",
+    "We confirm availability, final price and delivery before processing. If something is unavailable, you know before payment rather than after.",
+  ],
 ];
 
-/* -------------------------------------------------------------------------- */
-/* BUTTON STYLES                                                              */
-/* -------------------------------------------------------------------------- */
-
-const lightGreenButton =
-  "bg-[#D5E2D0] text-[#183F2A] border border-[#BFD0BA] shadow-[0_10px_28px_rgba(24,63,42,.10)] transition-all hover:bg-[#C7D8C1] hover:text-[#183F2A] hover:shadow-[0_14px_35px_rgba(24,63,42,.16)]";
-
-const softGreenButton =
-  "bg-[#E7EEE3] text-[#183F2A] border border-[#C9D9C4] shadow-none transition-all hover:bg-[#D5E2D0] hover:text-[#183F2A]";
-
-const darkGreenButton =
-  "bg-[#183F2A] text-white shadow-[0_8px_25px_rgba(24,63,42,.15)] transition-all hover:bg-[#10301F] hover:text-white hover:shadow-[0_10px_30px_rgba(24,63,42,.22)]";
-
-/* -------------------------------------------------------------------------- */
-/* HARVEST MARQUEE                                                            */
-/* -------------------------------------------------------------------------- */
-
-function HarvestMarquee() {
-  const words = [
-    ["☀", "HARVESTED BY THE SUN"],
-    ["☾", "BLESSED BY THE MOON"],
-    ["🌱", "GROWN WITH CARE"],
-    ["♡", "SHARED WITH TRUST"],
-  ];
-
-  return (
-    <section className="overflow-hidden border-y border-[#DCE4D8] bg-[#FCFAF4] py-5">
-      <motion.div
-        className="flex w-max items-center"
-        animate={{
-          x: ["0%", "-50%"],
-        }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      >
-        {[...Array(4)].flatMap((_, repeatIndex) =>
-          words.map(([icon, word]) => (
-            <div
-              key={`${repeatIndex}-${word}`}
-              className="flex items-center"
-            >
-              <span className="mr-3 text-sm text-[#A76545]">
-                {icon}
-              </span>
-
-              <span className="whitespace-nowrap text-[11px] font-semibold tracking-[0.28em] text-[#28583B] sm:text-xs">
-                {word}
-              </span>
-
-              <span className="mx-7 text-[#C6A15B] sm:mx-10">
-                ✦
-              </span>
-            </div>
-          )),
-        )}
-      </motion.div>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* SECTION LABEL                                                              */
-/* -------------------------------------------------------------------------- */
-
-function SectionLabel({
-  children,
-  light = false,
+/**
+ * Premium letter-by-letter motion.
+ *
+ * Each letter starts 1 second after the previous letter.
+ * Spaces are preserved without being animated.
+ */
+function LetterReveal({
+  text,
+  className = "",
+  startDelay = 0,
 }: {
-  children: ReactNode;
-  light?: boolean;
+  text: string;
+  className?: string;
+  startDelay?: number;
 }) {
+  const words = text.split(" ");
+
   return (
-    <div
-      className={`text-xs font-semibold uppercase tracking-[0.24em] ${
-        light ? "text-[#C9D9C4]" : "text-[#A76545]"
-      }`}
+    <motion.span
+      className={`inline-flex flex-wrap gap-x-[0.32em] ${className}`}
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: {
+          transition: {
+            staggerChildren: 0.08,
+            delayChildren: startDelay,
+          },
+        },
+      }}
+      aria-label={text}
     >
-      {children}
-    </div>
+      {words.map((word, index) => (
+        <motion.span
+          key={`${word}-${index}`}
+          aria-hidden="true"
+          variants={{
+            hidden: {
+              opacity: 0,
+              y: 10,
+              filter: "blur(5px)",
+            },
+            visible: {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              transition: {
+                duration: 0.5,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            },
+          }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </motion.span>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/* HOME                                                                       */
-/* -------------------------------------------------------------------------- */
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [area, setArea] = useState("");
-
-  const { scrollYProgress } = useScroll();
-
-  const heroY = useTransform(
-    scrollYProgress,
-    [0, 0.3],
-    [0, 70],
-  );
-
-  const heroOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.25],
-    [1, 0.78],
-  );
-
-  const navItems = [
-    ["Home", "#home"],
-    ["Today's Fresh List", "#fresh"],
-    ["Fresh Baskets", "#products"],
-    ["Share Your Harvest", "/share-your-harvest"],
-    ["About Us", "/about"],
-  ];
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
   return (
-    <main className="min-h-screen bg-[#F8F5EC] text-[#203128]">
-      {/* ------------------------------------------------------------------ */}
-      {/* ACCESSIBILITY                                                       */}
-      {/* ------------------------------------------------------------------ */}
+    <main className="min-h-screen overflow-x-hidden bg-[#f6f2e9] text-[#18271e]">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-[#193e25] focus:px-5 focus:py-3 focus:text-white"
+      >
+        Skip to Main Content
+      </a>
 
-      <div className="sr-only focus-within:not-sr-only">
-        <a
-          href="#main-content"
-          className="fixed left-4 top-4 z-[100] rounded-lg bg-white px-4 py-3 shadow-xl"
-        >
-          Skip to Main Content
-        </a>
+      {/* TOP ANNOUNCEMENT */}
+      <div className="border-b border-[#35583d] bg-[#193e25] px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-[#eee8da] sm:text-[11px]">
+        Fresh availability is updated every morning · Local harvests only
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* ANNOUNCEMENT                                                        */}
-      {/* ------------------------------------------------------------------ */}
-
-      <motion.div
-        initial={{
-          y: -40,
-          opacity: 0,
-        }}
-        animate={{
-          y: 0,
-          opacity: 1,
-        }}
-        className="bg-[#183F2A] px-4 py-2.5 text-center text-[11px] font-medium tracking-wide text-[#F5F1E6]"
-      >
-        Fresh availability is updated every morning · Local harvests only
-      </motion.div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* NAVBAR                                                              */}
-      {/* ------------------------------------------------------------------ */}
-
-      <header className="sticky top-0 z-50 border-b border-[#DCE4D8]/80 bg-[#F8F5EC]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[78px] max-w-[1320px] items-center justify-between px-5 lg:px-8">
-          {/* LOGO */}
-
-          <Link
-            href="/"
-            className="group flex items-center gap-3.5"
-          >
-            <motion.div
-              whileHover={{
-                scale: 1.06,
-              }}
-              whileTap={{
-                scale: 0.95,
-              }}
-              className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-[#D8E6D5]"
-            >
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-[#ded8ca] bg-[#f6f2e9]/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-[76px] max-w-[1380px] items-center justify-between px-5 lg:px-10">
+          <Link href="/" className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[#d8d1c1] bg-white">
               <Image
-            src="/amruta-dhaanya-logo.png"
-            alt="Amruta Dhaanya"
-            width={48}
-            height={48}
-            className="h-full w-full object-contain p-1"
-            />
-            </motion.div>
+                src="/amruta-dhaanya-logo.png"
+                alt="Amruta Dhaanya"
+                width={44}
+                height={44}
+                className="h-full w-full object-contain p-1"
+                priority
+              />
+            </span>
 
-            <div>
-              <div className="text-[17px] font-bold tracking-[-0.02em] text-[#183F2A]">
+            <span className="hidden sm:block">
+              <span className="block text-[15px] font-semibold tracking-[-0.02em] text-[#193e25]">
                 AMRUTA DHAANYA™
-              </div>
+              </span>
 
-              <div className="mt-0.5 text-[9px] font-medium uppercase tracking-[0.23em] text-[#738B72]">
+              <span className="mt-0.5 block text-[8px] uppercase tracking-[0.25em] text-[#7d806f]">
                 An Ahaar Kutumbam Initiative
-              </div>
-            </div>
+              </span>
+            </span>
           </Link>
 
-          {/* DESKTOP NAV */}
-
           <nav className="hidden items-center gap-7 lg:flex">
-            {navItems.map(([label, href]) => (
+            {[
+              ["Home", "/"],
+              ["Today's Fresh List", "/fresh"],
+              ["Fresh Baskets", "/products"],
+              ["Share Your Harvest", "/share-your-harvest"],
+              ["About Us", "/about"],
+            ].map(([label, href]) => (
               <Link
                 key={label}
                 href={href}
-                className="relative text-[13px] font-medium text-[#34483B] transition-colors hover:text-[#A76545]"
+                className="text-[12px] font-medium tracking-[0.03em] text-[#455048] transition-colors hover:text-[#a4663d]"
               >
                 {label}
               </Link>
             ))}
           </nav>
 
-          {/* ACTIONS */}
-
           <div className="hidden items-center gap-3 lg:flex">
             <AccountMenu />
 
             <Button
-              className={`h-10 rounded-full px-5 text-sm font-semibold ${darkGreenButton}`}
               asChild
+              className="h-10 rounded-full bg-[#193e25] px-5 text-xs font-semibold text-white hover:bg-[#12301b]"
             >
               <Link href="/cart">
                 <ShoppingBag className="mr-2 h-4 w-4" />
@@ -363,443 +226,850 @@ export default function Home() {
             </Button>
           </div>
 
-          {/* MOBILE MENU */}
-
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="rounded-full p-2 text-[#183F2A] lg:hidden"
-            aria-label={
-              menuOpen
-                ? "Close navigation"
-                : "Open navigation"
-            }
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="rounded-full border border-[#d7d1c4] p-2.5 text-[#193e25] lg:hidden"
           >
-            {menuOpen ? <X /> : <Menu />}
+            {menuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
 
-        {/* MOBILE NAV */}
-
         {menuOpen && (
-          <motion.div
-            initial={{
-              height: 0,
-              opacity: 0,
-            }}
-            animate={{
-              height: "auto",
-              opacity: 1,
-            }}
-            className="border-t border-[#DCE4D8] bg-[#F8F5EC] px-5 py-6 lg:hidden"
-          >
-            <div className="flex flex-col gap-5">
-              {navItems.map(([label, href]) => (
+          <div className="border-t border-[#ded8ca] bg-[#f6f2e9] px-5 py-5 lg:hidden">
+            <nav className="mx-auto flex max-w-[1380px] flex-col gap-4">
+              {[
+                ["Home", "/"],
+                ["Today's Fresh List", "#fresh"],
+                ["Fresh Baskets", "/products"],
+                ["Share Your Harvest", "/share-your-harvest"],
+                ["About Us", "/about"],
+                ["Login", "/login"],
+                ["Cart", "/cart"],
+              ].map(([label, href]) => (
                 <Link
                   key={label}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-sm font-medium text-[#203128]"
+                  className="text-base font-medium text-[#24352a]"
                 >
                   {label}
                 </Link>
               ))}
-
-              <div className="border-t border-[#DCE4D8] pt-5">
-                <AccountMenu />
-              </div>
-
-              <Link
-                href="/cart"
-                onClick={() => setMenuOpen(false)}
-                className="font-semibold text-[#183F2A]"
-              >
-                <ShoppingBag className="mr-2 inline h-4 w-4" />
-                Cart
-              </Link>
-            </div>
-          </motion.div>
+            </nav>
+          </div>
         )}
       </header>
 
       <div id="main-content">
-        {/* ---------------------------------------------------------------- */}
-        {/* HERO                                                              */}
-        {/* ---------------------------------------------------------------- */}
+        {/* ========================================================= */}
+        {/* HERO */}
+        {/* ========================================================= */}
 
         <section
           id="home"
-          className="relative overflow-hidden bg-[#F8F5EC]"
+          className="mx-auto max-w-[1380px] px-5 pt-5 sm:pt-7 lg:px-10 lg:pt-8"
         >
-          <div className="pointer-events-none absolute -right-40 top-20 h-[500px] w-[500px] rounded-full bg-[#E7EEE3] blur-3xl" />
+          <div className="relative min-h-[640px] overflow-hidden rounded-[32px] bg-[#183a23] sm:min-h-[680px] lg:min-h-[720px]">
+            <Image
+              src={image1}
+              alt="Fresh local greens growing near a home"
+              fill
+              priority
+              className="object-cover object-center opacity-65"
+              sizes="(max-width: 768px) 100vw, 1380px"
+            />
 
-          <div className="pointer-events-none absolute -left-40 bottom-0 h-[400px] w-[400px] rounded-full bg-[#F1E7CC]/50 blur-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#102919]/95 via-[#193b24]/65 to-[#193b24]/10" />
 
-          <motion.div
-            style={{
-              y: heroY,
-              opacity: heroOpacity,
-            }}
-            className="relative mx-auto grid min-h-[700px] max-w-[1320px] items-center gap-14 px-5 py-20 lg:grid-cols-[1fr_.9fr] lg:px-8 lg:py-24"
-          >
-            {/* HERO COPY */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f2617]/70 via-transparent to-transparent" />
 
-            <div>
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 18,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  duration: 0.6,
-                }}
-              >
-                <Badge className="rounded-full border border-[#D8E4D2] bg-[#E7EEE3] px-4 py-2 text-[#28583B] shadow-none">
-                  <Sprout className="mr-2 h-4 w-4" />
-                  Fresh from local growers
-                </Badge>
-              </motion.div>
+            {/* subtle moving light */}
+            <motion.div
+              className="pointer-events-none absolute -left-[20%] top-0 h-full w-[35%] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent blur-3xl"
+              animate={{
+                x: ["0%", "420%", "0%"],
+              }}
+              transition={{
+                duration: 18,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
 
-              <motion.h1
-                initial={{
-                  opacity: 0,
-                  y: 35,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  delay: 0.1,
-                  duration: 0.75,
-                }}
-                className="mt-7 max-w-3xl text-[48px] font-semibold leading-[1.01] tracking-[-0.055em] text-[#183F2A] sm:text-6xl lg:text-[76px]"
-              >
-                Pure food.
-                <br />
-                Honest farming.
-                <br />
-                <span className="text-[#A76545]">
-                  A healthier tomorrow.
-                </span>
-              </motion.h1>
+            <div className="relative flex min-h-[690px] flex-col justify-between p-7 sm:p-10 lg:p-16">
+              <div className="flex items-start justify-between gap-5">
+                <div className="max-w-[330px]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d4a45f]">
+                    An Ahaar Kutumbam Initiative
+                  </p>
 
-              <motion.p
-                initial={{
-                  opacity: 0,
-                  y: 25,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  delay: 0.24,
-                  duration: 0.7,
-                }}
-                className="mt-7 max-w-xl text-[17px] leading-8 text-[#68766C]"
-              >
-                Amruta Dhaanya connects families with
-                traditional foods sourced directly from
-                growers we know by name — no warehouses,
-                no anonymous sellers, only what is
-                genuinely available today.
-              </motion.p>
-
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 20,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  delay: 0.4,
-                }}
-                className="mt-9 flex flex-col gap-3 sm:flex-row"
-              >
-                <Button
-                  size="lg"
-                  className={`h-[52px] rounded-full px-7 font-semibold ${lightGreenButton}`}
-                  asChild
-                >
-                  <Link href="#products">
-                    Explore Products
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className={`h-[52px] rounded-full px-7 font-semibold ${softGreenButton}`}
-                  asChild
-                >
-                  <Link href="#growers">
-                    Become a Grower
-                  </Link>
-                </Button>
-              </motion.div>
-
-              <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-xs font-medium text-[#68766C]">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E7EEE3]">
-                    <Check className="h-3 w-3 text-[#28583B]" />
-                  </span>
-                  Verified growers
+                  <div className="mt-3 h-px w-16 bg-[#d4a45f]/80" />
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E7EEE3]">
-                    <Check className="h-3 w-3 text-[#28583B]" />
-                  </span>
-                  Checked before listing
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.8,
+                    delay: 1.2,
+                  }}
+                  className="hidden rounded-full border border-white/25 bg-white/10 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.16em] text-white/90 backdrop-blur-md sm:block"
+                >
+                  <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#8ed36e]" />
+                  Today's harvest
+                </motion.div>
+              </div>
+
+              <div className="grid gap-10 lg:grid-cols-[1.1fr_.6fr] lg:items-end">
+                <div className="max-w-[780px]">
+                  <motion.h1
+                    initial={{
+                      opacity: 0,
+                      y: 25,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    transition={{
+                      duration: 1,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className="font-display text-[clamp(3.6rem,8vw,7.9rem)] leading-[0.87] tracking-[-0.055em] text-[#f7f2e7]"
+                  >
+                    Fresh from
+                    <span className="block italic text-[#d7a260]">
+                      local growers.
+                    </span>
+                  </motion.h1>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.9,
+                      delay: 0.5,
+                    }}
+                    className="mt-7 max-w-[650px] text-base leading-7 text-white/80 sm:text-lg"
+                  >
+                    Pure food. Honest farming. A healthier tomorrow. We
+                    connect families with traditional foods sourced directly
+                    from growers we know — no warehouses, no anonymous sellers,
+                    only what is genuinely available.
+                  </motion.p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.9,
+                      delay: 0.9,
+                    }}
+                    className="mt-8 flex flex-col gap-3 sm:flex-row"
+                  >
+                    <Button
+                      asChild
+                      className="h-12 rounded-full bg-[#d39c55] px-7 text-sm font-semibold text-[#1b2d20] hover:bg-[#e0ae6c]"
+                    >
+                      <Link href="/products">
+                        Explore Products
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-12 rounded-full border-white/35 bg-white/5 px-7 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+                    >
+                      <Link href="/share-your-harvest">
+                        Become a Grower
+                      </Link>
+                    </Button>
+                  </motion.div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#E7EEE3]">
-                    <Check className="h-3 w-3 text-[#28583B]" />
-                  </span>
-                  Confirmed before payment
+                {/* ===================================================== */}
+                {/* LETTER BY LETTER PREMIUM TEXT */}
+                {/* ===================================================== */}
+
+                <div className="hidden max-w-[330px] justify-self-end lg:block">
+                  <div className="border-t border-white/25 pt-5">
+                    <div className="overflow-hidden">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#d4a45f]">
+                        <LetterReveal
+                          text="SELECTED, NOT JUST SOLD."
+                          startDelay={1.1}
+                        />
+                      </p>
+                    </div>
+
+                    <motion.p
+                      initial={{
+                        opacity: 0,
+                        y: 12,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      transition={{
+                        duration: 0.8,
+                        delay: 3,
+                      }}
+                      className="mt-3 text-sm leading-6 text-white/70"
+                    >
+                      Every harvest is checked, availability is real, and
+                      confirmation comes before payment.
+                    </motion.p>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* HERO VISUAL */}
-
-            <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.9,
-                rotate: 2,
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                rotate: 0,
-              }}
-              transition={{
-                duration: 0.9,
-                type: "spring",
-                stiffness: 90,
-              }}
-              className="relative"
-            >
-              <motion.div
-                animate={{
-                  y: [0, -10, 0],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="relative rounded-[42px] bg-[#E5ECDD] p-4 shadow-[0_35px_100px_rgba(24,63,42,.14)]"
-              >
-                <div className="relative min-h-[500px] overflow-hidden rounded-[34px] bg-[#D5E1CF] p-7">
-                  <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/40" />
-
-                  <div className="absolute -bottom-24 -left-20 h-72 w-72 rounded-full border border-white/30" />
-
-                  <div className="relative flex items-center justify-between">
-                    <Badge className="rounded-full border border-white/60 bg-white/80 px-4 py-2 text-[#28583B] shadow-none backdrop-blur">
-                      Today&apos;s harvest
-                    </Badge>
-
-                    <motion.div
-                      animate={{
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                      }}
-                      className="text-3xl"
-                    >
-                      🌾
-                    </motion.div>
-                  </div>
-
-                  <div className="relative flex min-h-[385px] flex-col items-center justify-center">
-                    <div className="flex items-center gap-4 text-7xl sm:gap-6 sm:text-8xl">
-                      <motion.span
-                        animate={{
-                          y: [0, -12, 0],
-                        }}
-                        transition={{
-                          duration: 2.8,
-                          repeat: Infinity,
-                        }}
-                      >
-                        🥬
-                      </motion.span>
-
-                      <motion.span
-                        animate={{
-                          y: [0, 10, 0],
-                        }}
-                        transition={{
-                          duration: 3.2,
-                          repeat: Infinity,
-                        }}
-                      >
-                        🌾
-                      </motion.span>
-
-                      <motion.span
-                        animate={{
-                          y: [0, -8, 0],
-                        }}
-                        transition={{
-                          duration: 2.5,
-                          repeat: Infinity,
-                        }}
-                      >
-                        🍎
-                      </motion.span>
-                    </div>
-
-                    <h2 className="mt-8 text-center text-4xl font-semibold tracking-[-0.04em] text-[#183F2A]">
-                      Grown nearby.
-                    </h2>
-
-                    <p className="mt-3 text-center text-base text-[#617268]">
-                      Selected carefully. Shared honestly.
-                    </p>
-                  </div>
-
-                  <div className="relative grid grid-cols-3 gap-3">
-                    {[
-                      ["✓", "Verified"],
-                      ["🌱", "Local"],
-                      ["♡", "Trusted"],
-                    ].map(([icon, label]) => (
-                      <motion.div
-                        key={label}
-                        whileHover={{
-                          y: -4,
-                        }}
-                        className="rounded-2xl border border-white/60 bg-white/75 p-4 text-center shadow-sm backdrop-blur"
-                      >
-                        <div className="text-xl">
-                          {icon}
-                        </div>
-
-                        <div className="mt-1 text-xs font-medium text-[#50665A]">
-                          {label}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* FLOATING CARD */}
-
-              <motion.div
-                animate={{
-                  y: [0, -7, 0],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute -bottom-7 -left-5 hidden rounded-2xl border border-[#DCE4D8] bg-[#FCFAF4] p-4 shadow-[0_18px_45px_rgba(24,63,42,.13)] sm:block"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F1E7CC]">
-                    <Leaf className="h-5 w-5 text-[#A76545]" />
-                  </div>
-
-                  <div>
-                    <div className="text-xs font-semibold text-[#183F2A]">
-                      Local harvest
-                    </div>
-
-                    <div className="mt-0.5 text-[10px] text-[#738078]">
-                      Available today
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* MARQUEE                                                           */}
-        {/* ---------------------------------------------------------------- */}
-
-        <HarvestMarquee />
-
-        {/* ---------------------------------------------------------------- */}
-        {/* TRUST STRIP                                                       */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section className="border-b border-[#DCE4D8] bg-[#FCFAF4]">
-          <div className="mx-auto grid max-w-[1320px] grid-cols-2 divide-x divide-[#DCE4D8] px-5 py-8 sm:grid-cols-4 lg:px-8">
-            {trustItems.map((item, index) => {
-              const Icon = item.icon;
-
-              return (
-                <motion.div
-                  key={item.title}
-                  initial={{
-                    opacity: 0,
-                    y: 15,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  viewport={{
-                    once: true,
-                  }}
-                  transition={{
-                    delay: index * 0.08,
-                  }}
-                  whileHover={{
-                    y: -3,
-                  }}
-                  className="flex items-center gap-3 px-4 py-3"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E7EEE3]">
-                    <Icon className="h-5 w-5 text-[#28583B]" />
-                  </div>
-
-                  <div>
-                    <div className="text-xs font-bold text-[#203128] sm:text-sm">
-                      {item.title}
-                    </div>
-
-                    <div className="mt-0.5 text-[10px] text-[#77827B] sm:text-xs">
-                      {item.text}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
           </div>
         </section>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* SEARCH                                                             */}
-        {/* ---------------------------------------------------------------- */}
+        {/* ========================================================= */}
+        {/* TRUST STRIP */}
+        {/* ========================================================= */}
 
-        <section className="bg-[#F8F5EC] px-5 py-24 lg:px-8">
-          <div className="mx-auto max-w-[920px] text-center">
+        <section className="mx-auto max-w-[1380px] px-5 py-6 lg:px-10 lg:py-8">
+          <div className="grid border-y border-[#d9d2c3] sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["01", "Verified growers", "Real local sellers"],
+              ["02", "Checked before listing", "Basic freshness check"],
+              ["03", "Confirmed before payment", "No unwanted surprises"],
+              ["04", "No warehouse stock", "Genuinely available"],
+            ].map(([number, title, text], i) => (
+              <motion.div
+                key={number}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                viewport={{
+                  once: true,
+                  margin: "-80px",
+                }}
+                transition={{
+                  duration: 0.7,
+                  delay: i * 0.12,
+                }}
+                className={`px-4 py-6 sm:px-6 lg:py-7 ${
+                  i !== 3
+                    ? "border-b border-[#d9d2c3] lg:border-b-0 lg:border-r"
+                    : ""
+                } ${
+                  i === 1 ? "sm:border-r" : ""
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <span className="font-display text-2xl text-[#b97945]">
+                    {number}
+                  </span>
+
+                  <Check className="h-4 w-4 text-[#4d724e]" />
+                </div>
+
+                <p className="mt-5 text-sm font-semibold text-[#213429]">
+                  {title}
+                </p>
+
+                <p className="mt-1 text-xs text-[#7a7b70]">
+                  {text}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+{/* ========================================================= */}
+{/* CHOOSE YOUR PATH */}
+{/* ========================================================= */}
+
+<section className="mx-auto max-w-[1380px] px-5 py-20 lg:px-10 lg:py-28">
+  {/* Heading */}
+  <motion.div
+    initial={{ opacity: 0, y: 24 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-80px" }}
+    transition={{ duration: 0.8 }}
+    className="max-w-[760px]"
+  >
+    <div className="flex items-center gap-3">
+      <span className="h-px w-10 bg-[#b97945]" />
+
+      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#a4663d]">
+        Start here
+      </p>
+    </div>
+
+    <h2 className="mt-5 font-display text-[clamp(3rem,6vw,6rem)] leading-[0.9] tracking-[-0.055em] text-[#1d2d22]">
+      What are you
+      <span className="block italic text-[#315e34]">
+        here for?
+      </span>
+    </h2>
+
+    <p className="mt-6 max-w-[600px] text-base leading-7 text-[#707268] sm:text-lg">
+      Choose how you want to be part of the local harvest network.
+      Buy individual produce, choose a ready basket, or share what
+      you grow.
+    </p>
+  </motion.div>
+
+  {/* Three paths */}
+  <div className="mt-12 grid gap-5 lg:grid-cols-3">
+    {/* ===================================================== */}
+    {/* FRESH LIST */}
+    {/* ===================================================== */}
+
+    <Link href="/fresh" className="group">
+      <motion.article
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.7, delay: 0.05 }}
+        whileHover={{ y: -8 }}
+        className="relative min-h-[480px] overflow-hidden rounded-[28px] bg-[#315e34]"
+      >
+        {/* Background image */}
+        <Image
+          src={image1}
+          alt="Fresh individual produce from local growers"
+          fill
+          className="object-cover transition duration-[1000ms] ease-out group-hover:scale-[1.06]"
+          sizes="(max-width: 1024px) 100vw, 33vw"
+        />
+
+        {/* Image treatment */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#102618]/95 via-[#193e25]/35 to-transparent" />
+
+        {/* Number */}
+        <div className="absolute left-6 top-6">
+          <span className="font-display text-3xl text-white/40">
+            01
+          </span>
+        </div>
+
+        {/* Arrow */}
+        <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:border-white/50 group-hover:bg-white group-hover:text-[#193e25]">
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </div>
+
+        {/* Content */}
+        <div className="absolute inset-x-6 bottom-6">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#d5a15c]">
+            Buy individual items
+          </p>
+
+          <h3 className="mt-3 font-display text-4xl leading-[0.95] tracking-[-0.04em] text-white sm:text-5xl">
+            Fresh List
+          </h3>
+
+          <p className="mt-4 max-w-[340px] text-sm leading-6 text-white/70">
+            See the individual harvests available today and choose
+            exactly what you need.
+          </p>
+
+          <div className="mt-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white">
+            Explore Fresh List
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
+        </div>
+      </motion.article>
+    </Link>
+
+    {/* ===================================================== */}
+    {/* FRESH BASKETS */}
+    {/* ===================================================== */}
+
+    <Link href="/products" className="group">
+      <motion.article
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.7, delay: 0.15 }}
+        whileHover={{ y: -8 }}
+        className="relative min-h-[480px] overflow-hidden rounded-[28px] bg-[#b88955]"
+      >
+        {/* Background image */}
+        <Image
+          src={image2}
+          alt="Curated fresh basket prepared from local harvests"
+          fill
+          className="object-cover transition duration-[1000ms] ease-out group-hover:scale-[1.06]"
+          sizes="(max-width: 1024px) 100vw, 33vw"
+        />
+
+        {/* Image treatment */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#2a2117]/95 via-[#6f5434]/35 to-transparent" />
+
+        {/* Number */}
+        <div className="absolute left-6 top-6">
+          <span className="font-display text-3xl text-white/45">
+            02
+          </span>
+        </div>
+
+        {/* Arrow */}
+        <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:border-white/50 group-hover:bg-white group-hover:text-[#352817]">
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </div>
+
+        {/* Content */}
+        <div className="absolute inset-x-6 bottom-6">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#f1c985]">
+            Buy a ready basket
+          </p>
+
+          <h3 className="mt-3 font-display text-4xl leading-[0.95] tracking-[-0.04em] text-white sm:text-5xl">
+            Fresh Baskets
+          </h3>
+
+          <p className="mt-4 max-w-[340px] text-sm leading-6 text-white/70">
+            Prefer something already put together? Explore baskets
+            prepared from available local harvests.
+          </p>
+
+          <div className="mt-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white">
+            Explore Fresh Baskets
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
+        </div>
+      </motion.article>
+    </Link>
+
+    {/* ===================================================== */}
+    {/* SHARE YOUR HARVEST */}
+    {/* ===================================================== */}
+
+    <Link href="/share-your-harvest" className="group">
+      <motion.article
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.7, delay: 0.25 }}
+        whileHover={{ y: -8 }}
+        className="relative min-h-[480px] overflow-hidden rounded-[28px] bg-[#d7c19e]"
+      >
+        {/* Background image */}
+        <Image
+          src={image3}
+          alt="Local grower harvest"
+          fill
+          className="object-cover transition duration-[1000ms] ease-out group-hover:scale-[1.06]"
+          sizes="(max-width: 1024px) 100vw, 33vw"
+        />
+
+        {/* Image treatment */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#263a29]/95 via-[#3b513c]/30 to-transparent" />
+
+        {/* Number */}
+        <div className="absolute left-6 top-6">
+          <span className="font-display text-3xl text-white/45">
+            03
+          </span>
+        </div>
+
+        {/* Arrow */}
+        <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:border-white/50 group-hover:bg-white group-hover:text-[#193e25]">
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </div>
+
+        {/* Content */}
+        <div className="absolute inset-x-6 bottom-6">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#e4bd7e]">
+            For local growers
+          </p>
+
+          <h3 className="mt-3 font-display text-4xl leading-[0.95] tracking-[-0.04em] text-white sm:text-5xl">
+            Share Your Harvest
+          </h3>
+
+          <p className="mt-4 max-w-[340px] text-sm leading-6 text-white/70">
+            Have something genuine to share? Join the local network
+            and make your harvest available to nearby families.
+          </p>
+
+          <div className="mt-6 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-white">
+            Share Your Harvest
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </div>
+        </div>
+      </motion.article>
+    </Link>
+  </div>
+
+  {/* Bottom statement */}
+  <motion.div
+    initial={{ opacity: 0, y: 15 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.7, delay: 0.2 }}
+    className="mt-7 flex flex-col gap-3 border-t border-[#d9d2c3] pt-5 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <p className="text-xs leading-5 text-[#77776d]">
+      One local network. Different ways to participate.
+    </p>
+
+    <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#96968a]">
+      Amruta Dhaanya · Ahaar Kutumbam Initiative
+    </p>
+  </motion.div>
+</section>
+       {/* ========================================================= */}
+{/* TODAY'S HARVEST — HOMEPAGE EDITORIAL SECTION */}
+{/* ========================================================= */}
+<section
+  id="fresh"
+  className="mx-auto max-w-[1380px] px-5 py-20 lg:px-10 lg:py-32"
+>
+  {/* Section heading */}
+  <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="flex items-center gap-3">
+        <span className="h-px w-10 bg-[#b97945]" />
+
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#a4663d]">
+          Today's harvest
+        </p>
+      </div>
+
+      <h2 className="mt-5 max-w-[850px] font-display text-[clamp(3rem,6vw,6.2rem)] leading-[0.9] tracking-[-0.055em] text-[#1d2d22]">
+        Grown nearby.
+        <span className="block italic text-[#2d612c]">
+          Available today.
+        </span>
+      </h2>
+    </motion.div>
+
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay: 0.15 }}
+      className="lg:pb-2"
+    >
+      <p className="text-sm leading-6 text-[#707268]">
+        We don't fill shelves just to make them look full.
+        This is a snapshot of what local growers genuinely
+        have available right now.
+      </p>
+
+      <Link
+        href="/products"
+        className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#244b2b] transition hover:text-[#a4663d]"
+      >
+        Explore the complete fresh list
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </motion.div>
+  </div>
+
+  {/* Editorial harvest cards */}
+  <div className="mt-14 grid gap-5 lg:grid-cols-[1.35fr_.8fr_.8fr]">
+    {products.map((product, index) => (
+      <Link
+        href={`/products/${product.name
+          .toLowerCase()
+          .replaceAll(" ", "-")}`}
+        key={product.name}
+        className="group"
+      >
+        <motion.article
+          initial={{
+            opacity: 0,
+            y: 30,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            margin: "-60px",
+          }}
+          transition={{
+            duration: 0.75,
+            delay: index * 0.12,
+          }}
+          whileHover={{
+            y: -8,
+          }}
+          className={`relative overflow-hidden rounded-[24px] ${
+            index === 0
+              ? "min-h-[570px] lg:min-h-[610px]"
+              : "min-h-[420px] lg:min-h-[610px]"
+          }`}
+        >
+          {/* Image */}
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover transition duration-[900ms] group-hover:scale-[1.06]"
+            sizes={
+              index === 0
+                ? "(max-width: 1024px) 100vw, 55vw"
+                : "(max-width: 1024px) 100vw, 25vw"
+            }
+          />
+
+          {/* Image treatment */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d2114]/95 via-[#193e25]/20 to-transparent" />
+
+          {/* Top metadata */}
+          <div className="absolute left-5 right-5 top-5 flex items-start justify-between">
+            <span className="rounded-full border border-white/20 bg-[#f6f2e9]/90 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#315e34] backdrop-blur-md">
+              {product.tag}
+            </span>
+
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/10 text-white backdrop-blur-md transition group-hover:bg-white group-hover:text-[#193e25]">
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
+
+          {/* Bottom content */}
+          <div className="absolute inset-x-5 bottom-5 sm:inset-x-6 sm:bottom-6">
+            <div className="max-w-[520px]">
+              <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#d5a15c]">
+                Local harvest
+              </p>
+
+              <h3
+                className={`font-display tracking-[-0.035em] text-white ${
+                  index === 0
+                    ? "text-4xl sm:text-5xl"
+                    : "text-3xl"
+                }`}
+              >
+                {product.name}
+              </h3>
+
+              <p className="mt-3 max-w-[430px] text-sm leading-6 text-white/70">
+                {product.description}
+              </p>
+
+              <div className="mt-5 flex items-center gap-3">
+                <span className="font-display text-2xl text-white">
+                  {product.price}
+                </span>
+
+                <span className="text-xs text-white/55">
+                  {product.unit}
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.article>
+      </Link>
+    ))}
+  </div>
+
+  {/* Availability note */}
+  <motion.div
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay: 0.25 }}
+    className="mt-7 flex flex-col gap-3 border-t border-[#d9d2c3] pt-5 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <div className="flex items-center gap-2">
+      <span className="h-2 w-2 animate-pulse rounded-full bg-[#5f8b50]" />
+
+      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#687066]">
+        Live local availability
+      </span>
+    </div>
+
+    <p className="text-xs text-[#88887d]">
+      Availability changes with the harvest. Orders are confirmed before
+      processing.
+    </p>
+  </motion.div>
+</section>
+
+        {/* ========================================================= */}
+{/* STORY — THE CLOSER STORY */}
+{/* ========================================================= */}
+
+<section className="relative overflow-hidden bg-[#e9e3d6]">
+  {/* Decorative background detail */}
+  <div className="pointer-events-none absolute -right-32 top-20 h-[420px] w-[420px] rounded-full border border-[#c9c1b1]/40" />
+
+  <div className="pointer-events-none absolute -right-20 top-32 h-[280px] w-[280px] rounded-full border border-[#c9c1b1]/30" />
+
+  <div className="mx-auto max-w-[1380px] px-5 py-24 lg:px-10 lg:py-36">
+    {/* Intro */}
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="max-w-[900px]"
+    >
+      <div className="flex items-center gap-3">
+        <span className="h-px w-10 bg-[#a4663d]" />
+
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#8b633f]">
+          The Amruta Dhaanya way
+        </p>
+      </div>
+
+      <h2 className="mt-6 font-display text-[clamp(3.2rem,7vw,7rem)] leading-[0.88] tracking-[-0.06em] text-[#1d2d22]">
+        Food should have
+        <span className="block italic text-[#315e34]">
+          a closer story.
+        </span>
+      </h2>
+    </motion.div>
+
+    {/* Main story */}
+    <div className="mt-16 grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:items-center">
+      {/* Image composition */}
+      <motion.div
+        initial={{
+          opacity: 0,
+          x: -40,
+        }}
+        whileInView={{
+          opacity: 1,
+          x: 0,
+        }}
+        viewport={{
+          once: true,
+        }}
+        transition={{
+          duration: 1,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className="relative"
+      >
+        <div className="relative aspect-[1.05/1] overflow-hidden rounded-[28px]">
+          <Image
+            src={image2}
+            alt="Local harvest and traditional plants"
+            fill
+            className="object-cover transition duration-[1200ms] hover:scale-[1.03]"
+            sizes="(max-width: 1024px) 100vw, 55vw"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#14291a]/70 via-transparent to-transparent" />
+
+          {/* Image caption */}
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="flex items-end justify-between gap-6">
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#d5a15c]">
+                  Grown nearby
+                </p>
+
+                <p className="mt-2 max-w-[300px] font-display text-2xl leading-tight text-white sm:text-3xl">
+                  Selected carefully.
+                  <br />
+                  Shared honestly.
+                </p>
+              </div>
+
+              <span className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/10 backdrop-blur-md sm:flex">
+                <ArrowRight className="h-4 w-4 text-white" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Small floating detail */}
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+          }}
+          transition={{
+            duration: 0.7,
+            delay: 0.4,
+          }}
+          className="absolute -bottom-6 -right-4 hidden rounded-[18px] border border-[#c8c0b0] bg-[#f6f2e9] px-5 py-4 shadow-[0_18px_45px_rgba(42,48,35,.10)] sm:block lg:-right-8"
+        >
+          <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#8a8a7e]">
+            Our principle
+          </p>
+
+          <p className="mt-1 font-display text-xl text-[#244b2b]">
+            Real food.
+          </p>
+        </motion.div>
+      </motion.div>
+
+      {/* Story copy */}
+      <motion.div
+        initial={{
+          opacity: 0,
+          x: 40,
+        }}
+        whileInView={{
+          opacity: 1,
+          x: 0,
+        }}
+        viewport={{
+          once: true,
+        }}
+        transition={{
+          duration: 1,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className="lg:pl-4"
+      >
+        <p className="max-w-[580px] text-lg leading-8 text-[#555c52] sm:text-xl">
+          We believe the distance between a grower and a family
+          should be smaller.
+        </p>
+
+        <p className="mt-6 max-w-[580px] text-sm leading-7 text-[#71736a]">
+          Amruta Dhaanya is built around a simple idea: local food
+          becomes more meaningful when you know where it comes from,
+          who grew it and whether it is actually available.
+        </p>
+
+        <p className="mt-5 max-w-[580px] text-sm leading-7 text-[#71736a]">
+          Instead of building another anonymous marketplace, we are
+          creating a trusted local network connecting growers,
+          households and communities through real daily harvests.
+        </p>
+
+        {/* Principles */}
+        <div className="mt-10 grid max-w-[600px] grid-cols-2 border-t border-[#c9c1b1]">
+          {[
+            ["Local", "Closer to home"],
+            ["Verified", "Known growers"],
+            ["Traditional", "Food with heritage"],
+            ["Honest", "Availability before promises"],
+          ].map(([title, text], index) => (
             <motion.div
+              key={title}
               initial={{
                 opacity: 0,
-                y: 25,
+                y: 15,
               }}
               whileInView={{
                 opacity: 1,
@@ -808,715 +1078,468 @@ export default function Home() {
               viewport={{
                 once: true,
               }}
+              transition={{
+                duration: 0.5,
+                delay: 0.3 + index * 0.08,
+              }}
+              className={`py-5 ${
+                index % 2 === 0
+                  ? "border-r border-[#c9c1b1] pr-5"
+                  : "pl-5"
+              } ${
+                index > 1
+                  ? "border-t border-[#c9c1b1]"
+                  : ""
+              }`}
             >
-              <SectionLabel>
-                Find what you need
-              </SectionLabel>
-
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#183F2A] sm:text-5xl">
-                What are you looking for today?
-              </h2>
-
-              <p className="mx-auto mt-4 max-w-xl text-[#68766C]">
-                Explore what local growers and producers
-                have genuinely available today.
+              <p className="font-display text-xl text-[#244b2b]">
+                {title}
               </p>
 
-              <div className="relative mx-auto mt-9 max-w-2xl">
-                <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8B978D]" />
-
-                <Input
-                  value={search}
-                  onChange={(e) =>
-                    setSearch(e.target.value)
-                  }
-                  placeholder="Search vegetables, fruits, groceries..."
-                  className="h-16 rounded-full border-[#D8E2D3] bg-white pl-14 pr-28 text-base shadow-[0_15px_45px_rgba(24,63,42,.07)] focus-visible:ring-[#28583B]"
-                />
-
-                <Button
-                  className="absolute right-2 top-2 h-12 rounded-full bg-[#D5E2D0] px-6 font-semibold text-[#183F2A] shadow-sm hover:bg-[#C7D8C1] hover:text-[#183F2A]"
-                  onClick={() => {
-                    document
-                      .getElementById("products")
-                      ?.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                  }}
-                >
-                  Search
-                </Button>
-              </div>
-
-              {search && (
-                <p className="mt-4 text-sm text-[#718078]">
-                  Showing fresh products for{" "}
-                  <span className="font-semibold text-[#28583B]">
-                    &quot;{search}&quot;
-                  </span>
-                </p>
-              )}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* CATEGORIES                                                        */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section
-          id="fresh"
-          className="bg-[#F8F5EC] px-5 pb-28 lg:px-8"
-        >
-          <div className="mx-auto max-w-[1320px]">
-            <div className="mb-10 flex items-end justify-between">
-              <div>
-                <SectionLabel>Browse</SectionLabel>
-
-                <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[#183F2A] sm:text-4xl">
-                  Fresh categories
-                </h2>
-              </div>
-
-              <Link
-                href="#products"
-                className="hidden items-center text-sm font-semibold text-[#A76545] sm:flex"
-              >
-                View all
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
-              {categories.map((category, index) => (
-                <motion.button
-                  key={category.name}
-                  type="button"
-                  initial={{
-                    opacity: 0,
-                    y: 20,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  viewport={{
-                    once: true,
-                  }}
-                  transition={{
-                    delay: index * 0.05,
-                  }}
-                  whileHover={{
-                    y: -7,
-                    scale: 1.02,
-                  }}
-                  whileTap={{
-                    scale: 0.97,
-                  }}
-                  className="group rounded-[26px] border border-[#DCE4D8] bg-[#FCFAF4] p-5 text-center shadow-[0_6px_25px_rgba(24,63,42,.035)] transition-all hover:border-[#C7D5C2] hover:shadow-[0_18px_40px_rgba(24,63,42,.09)]"
-                >
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#E7EEE3] text-3xl transition-transform group-hover:scale-110">
-                    {category.icon}
-                  </div>
-
-                  <div className="mt-4 text-sm font-semibold text-[#304237]">
-                    {category.name}
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* PRODUCTS / FRESH BASKETS                                          */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section
-          id="products"
-          className="relative overflow-hidden bg-[#E7EEE3] px-5 py-28 lg:px-8"
-        >
-          <div className="pointer-events-none absolute -right-32 top-20 h-96 w-96 rounded-full bg-white/30 blur-3xl" />
-
-          <div className="relative mx-auto max-w-[1320px]">
-            <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-              <div>
-                <SectionLabel>
-                  Our collection
-                </SectionLabel>
-
-                <h2 className="mt-3 text-4xl font-semibold tracking-[-0.04em] text-[#183F2A] sm:text-5xl">
-                  Food with a story.
-                </h2>
-
-                <p className="mt-4 max-w-2xl text-[#68766C]">
-                  Traditional foods sourced directly from
-                  the growers and producers we work with.
-                </p>
-              </div>
-
-              <Button
-                variant="outline"
-                className={`w-fit rounded-full ${softGreenButton}`}
-                asChild
-              >
-                <Link href="#fresh">
-                  View Fresh List
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {products.map((product, index) => {
-                const accent =
-                  product.accent === "gold"
-                    ? {
-                        bg: "#F1E7CC",
-                        text: "#8B6B35",
-                      }
-                    : product.accent === "terracotta"
-                      ? {
-                          bg: "#F2E1D8",
-                          text: "#8D533A",
-                        }
-                      : {
-                          bg: "#D5E2D0",
-                          text: "#28583B",
-                        };
-
-                return (
-                  <motion.div
-                    key={product.slug}
-                    initial={{
-                      opacity: 0,
-                      y: 35,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                    }}
-                    transition={{
-                      delay: index * 0.12,
-                    }}
-                    whileHover={{
-                      y: -8,
-                    }}
-                  >
-                    <Card className="group overflow-hidden rounded-[30px] border-[#D6E0D2] bg-[#FCFAF4] shadow-[0_8px_35px_rgba(24,63,42,.055)] transition-shadow hover:shadow-[0_20px_55px_rgba(24,63,42,.12)]">
-                      <Link
-                        href={`/products/${product.slug}`}
-                      >
-                        <div
-                          className="relative flex h-72 items-center justify-center overflow-hidden"
-                          style={{
-                            backgroundColor: accent.bg,
-                          }}
-                        >
-                          <motion.div
-                            whileHover={{
-                              scale: 1.15,
-                              rotate: 5,
-                            }}
-                            transition={{
-                              type: "spring",
-                              stiffness: 200,
-                            }}
-                            className="text-8xl"
-                          >
-                            {product.emoji}
-                          </motion.div>
-
-                          <Badge
-                            className="absolute left-5 top-5 rounded-full border border-white/70 bg-white/80 shadow-none backdrop-blur"
-                            style={{
-                              color: accent.text,
-                            }}
-                          >
-                            Local harvest
-                          </Badge>
-                        </div>
-                      </Link>
-
-                      <CardContent className="p-7">
-                        <Link
-                          href={`/products/${product.slug}`}
-                        >
-                          <h3 className="text-2xl font-semibold tracking-[-0.03em] text-[#203128] transition-colors hover:text-[#A76545]">
-                            {product.name}
-                          </h3>
-                        </Link>
-
-                        <p className="mt-3 min-h-[72px] text-sm leading-6 text-[#6B796F]">
-                          {product.description}
-                        </p>
-
-                        <div className="mt-7 flex items-end justify-between">
-                          <div>
-                            <span className="text-2xl font-semibold text-[#183F2A]">
-                              {product.price}
-                            </span>
-
-                            <span className="ml-1 text-sm text-[#7A857D]">
-                              {product.unit}
-                            </span>
-                          </div>
-
-                          <Button
-                            size="icon"
-                            className="h-11 w-11 rounded-full bg-[#183F2A] text-white shadow-md transition-transform group-hover:scale-110 hover:bg-[#10301F] hover:text-white"
-                            asChild
-                          >
-                            <Link
-                              href={`/products/${product.slug}`}
-                              aria-label={`View ${product.name}`}
-                            >
-                              <ShoppingBag className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* PURPOSE / ABOUT                                                   */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section
-          id="about"
-          className="bg-[#F8F5EC] px-5 py-28 lg:px-8"
-        >
-          <div className="mx-auto grid max-w-[1320px] gap-16 lg:grid-cols-2 lg:items-center">
-            <motion.div
-              initial={{
-                opacity: 0,
-                x: -40,
-              }}
-              whileInView={{
-                opacity: 1,
-                x: 0,
-              }}
-              viewport={{
-                once: true,
-              }}
-            >
-              <Badge className="rounded-full border border-[#D8E4D2] bg-[#E7EEE3] text-[#28583B] shadow-none">
-                Why we started
-              </Badge>
-
-              <h2 className="mt-6 max-w-xl text-4xl font-semibold leading-[1.08] tracking-[-0.045em] text-[#183F2A] sm:text-5xl">
-                A better way for local harvests to reach nearby homes.
-              </h2>
-
-              <p className="mt-6 max-w-xl text-lg leading-8 text-[#66756B]">
-                Many local growers face waste, unstable
-                pricing, and limited access to nearby
-                households. Amruta Dhaanya was started to
-                build a more trustworthy and responsible
-                local fresh-food network for both growers
-                and families.
+              <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-[#88887d]">
+                {text}
               </p>
-
-              <Button
-                className={`mt-8 rounded-full px-6 font-semibold ${lightGreenButton}`}
-                asChild
-              >
-                <Link href="/about">
-                  About Us
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
             </motion.div>
+          ))}
+        </div>
 
-            <motion.div
-              initial={{
-                opacity: 0,
-                x: 40,
-              }}
-              whileInView={{
-                opacity: 1,
-                x: 0,
-              }}
-              viewport={{
-                once: true,
-              }}
-              className="relative"
-            >
-              <div className="relative overflow-hidden rounded-[42px] bg-[#183F2A] p-8 text-white shadow-[0_25px_70px_rgba(24,63,42,.18)] sm:p-12">
-                <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full border border-white/10" />
-
-                <div className="absolute -bottom-28 -left-28 h-72 w-72 rounded-full border border-white/10" />
-
-                <div className="relative">
-                  <div className="text-6xl">
-                    🌱
-                  </div>
-
-                  <p className="mt-8 text-xs font-medium uppercase tracking-[0.22em] text-[#C9D9C4]">
-                    Ahaar Kutumbam
-                  </p>
-
-                  <h3 className="mt-3 text-4xl font-semibold tracking-[-0.04em]">
-                    Every home can grow.
-                    <br />
-                    Every harvest has value.
-                  </h3>
-
-                  <p className="mt-6 max-w-lg leading-7 text-[#C8D9C4]">
-                    A community of growers, local agents and
-                    families participating in one transparent,
-                    trust-based marketplace.
-                  </p>
-
-                  <div className="mt-10 grid grid-cols-3 gap-3">
-                    {[
-                      ["Growers", "Local"],
-                      ["Families", "Connected"],
-                      ["Harvests", "Valued"],
-                    ].map(([title, subtitle]) => (
-                      <div
-                        key={title}
-                        className="rounded-2xl border border-white/10 bg-white/[0.07] p-4 backdrop-blur-sm"
-                      >
-                        <div className="text-sm font-bold">
-                          {title}
-                        </div>
-
-                        <div className="mt-1 text-[10px] uppercase tracking-wider text-[#B8D3AD]">
-                          {subtitle}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* HONESTY                                                           */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section className="bg-[#F0EEE3] px-5 py-28 lg:px-8">
-          <div className="mx-auto max-w-[1320px]">
-            <div className="max-w-3xl">
-              <SectionLabel>
-                How we keep it honest
-              </SectionLabel>
-
-              <h2 className="mt-4 text-4xl font-semibold leading-[1.08] tracking-[-0.045em] text-[#183F2A] sm:text-5xl">
-                Real availability. Private sellers. Nothing promised until it&apos;s confirmed.
-              </h2>
-
-              <p className="mt-5 text-lg leading-8 text-[#66756B]">
-                We don&apos;t stock a warehouse and we don&apos;t
-                promise everything, every day. Every item
-                comes from a registered local seller, is
-                checked for basic freshness before it&apos;s
-                listed, and is confirmed with you before
-                anything is processed or paid for.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-5 md:grid-cols-2">
-              {[
-                [
-                  "01",
-                  "Registered Seller Codes",
-                  "Every local seller is assigned a private service code. Their identity stays protected, and every order stays traceable.",
-                ],
-                [
-                  "02",
-                  "Checked Before Listing",
-                  "Poor-quality or damaged items simply aren&apos;t listed. What&apos;s available is what genuinely passed a basic freshness check.",
-                ],
-                [
-                  "03",
-                  "Confirmed Before Payment",
-                  "We confirm stock, final price and delivery with you first. If something isn't available, you'll know before you pay.",
-                ],
-                [
-                  "04",
-                  "Not Quick Commerce",
-                  "We're not built for instant delivery. We're built to get it right — careful sourcing, handling and delivery.",
-                ],
-              ].map(([number, title, text], index) => (
-                <motion.div
-                  key={number}
-                  initial={{
-                    opacity: 0,
-                    y: 25,
-                  }}
-                  whileInView={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  viewport={{
-                    once: true,
-                  }}
-                  transition={{
-                    delay: index * 0.08,
-                  }}
-                  whileHover={{
-                    y: -5,
-                  }}
-                  className="rounded-[28px] border border-[#D8E1D4] bg-[#FCFAF4] p-7 shadow-[0_7px_25px_rgba(24,63,42,.04)]"
-                >
-                  <div className="flex items-start gap-5">
-                    <span className="text-sm font-bold text-[#A76545]">
-                      {number}
-                    </span>
-
-                    <div>
-                      <h3 className="text-xl font-semibold text-[#203128]">
-                        {title}
-                      </h3>
-
-                      <p className="mt-3 text-sm leading-7 text-[#6B786F]">
-                        {text}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* HOW IT WORKS                                                      */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section className="bg-[#F8F5EC] px-5 py-28 lg:px-8">
-          <div className="mx-auto max-w-[1320px]">
-            <div className="text-center">
-              <SectionLabel>
-                Simple by design
-              </SectionLabel>
-
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#183F2A] sm:text-5xl">
-                How it works
-              </h2>
-
-              <p className="mx-auto mt-4 max-w-xl text-[#68766C]">
-                A simple process built around real availability
-                and honest confirmation.
-              </p>
-            </div>
-
-            <div className="relative mt-16 grid gap-12 md:grid-cols-3">
-              <div className="absolute left-[17%] right-[17%] top-10 hidden h-px bg-[#D5DFD1] md:block" />
-
-              {[
-                [
-                  "01",
-                  Search,
-                  "Browse & Order",
-                  "Choose from today&apos;s available products or select a planned weekly basket.",
-                ],
-                [
-                  "02",
-                  Check,
-                  "We Confirm",
-                  "Stock, final price and delivery are confirmed before you're charged.",
-                ],
-                [
-                  "03",
-                  Truck,
-                  "Delivered Fresh",
-                  "Your order is handled carefully from grower to your door.",
-                ],
-              ].map(([number, Icon, title, text], index) => {
-                const StepIcon = Icon as typeof Search;
-
-                return (
-                  <motion.div
-                    key={number as string}
-                    initial={{
-                      opacity: 0,
-                      y: 30,
-                    }}
-                    whileInView={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    viewport={{
-                      once: true,
-                    }}
-                    transition={{
-                      delay: index * 0.15,
-                    }}
-                    className="relative text-center"
-                  >
-                    <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#F8F5EC] bg-[#E7EEE3] text-[#28583B] shadow-[0_5px_20px_rgba(24,63,42,.08)]">
-                      <StepIcon className="h-7 w-7" />
-                    </div>
-
-                    <div className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#A76545]">
-                      {number as string}
-                    </div>
-
-                    <h3 className="mt-2 text-2xl font-semibold text-[#203128]">
-                      {title as string}
-                    </h3>
-
-                    <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-[#6B786F]">
-                      {text as string}
-                    </p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* DELIVERY                                                           */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section className="bg-[#F8F5EC] px-5 pb-28 lg:px-8">
-          <div className="mx-auto max-w-[1320px]">
-            <motion.div
-              whileHover={{
-                scale: 1.005,
-              }}
-              className="overflow-hidden rounded-[40px] bg-[#E3EBDD] shadow-[0_12px_45px_rgba(24,63,42,.06)]"
-            >
-              <div className="grid lg:grid-cols-2">
-                {/* LEFT SIDE */}
-
-                <div className="p-8 sm:p-12 lg:p-16">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FCFAF4] text-[#28583B]">
-                    <MapPin />
-                  </div>
-
-                  <h2 className="mt-7 max-w-lg text-4xl font-semibold leading-[1.08] tracking-[-0.04em] text-[#183F2A]">
-                    Not sure if we deliver to your area?
-                  </h2>
-
-                  <p className="mt-5 max-w-lg leading-7 text-[#617268]">
-                    We are currently testing delivery and
-                    pickup support in selected areas of
-                    Warangal, Hanamkonda, Kazipet and
-                    nearby local communities.
-                  </p>
-
-                  <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                    <Input
-                      value={area}
-                      onChange={(e) =>
-                        setArea(e.target.value)
-                      }
-                      placeholder="Enter your area or pincode"
-                      className="h-12 rounded-full border-white bg-white focus-visible:ring-[#28583B]"
-                    />
-
-                    <Button
-                      type="button"
-                      className="h-12 shrink-0 rounded-full bg-[#183F2A] px-6 text-white transition-all hover:bg-[#28583B]"
-                      onClick={() => {
-                        const phoneNumber = "919177751088";
-
-                        const message = area.trim()
-                          ? `Hi Amruta Dhaanya, I would like to check delivery availability for ${area.trim()}.`
-                          : "Hi Amruta Dhaanya, I would like to check delivery availability in my area.";
-
-                        const whatsappUrl =
-                          `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-
-                        window.location.href = whatsappUrl;
-                      }}
-                    >
-                      Check on WhatsApp
-                    </Button>
-                  </div>
-
-                  <p className="mt-3 text-xs text-[#748279]">
-                    We&apos;ll open WhatsApp with your area filled
-                    in — just hit send.
-                  </p>
-                </div>
-
-                {/* RIGHT SIDE */}
-
-                <div className="relative min-h-[380px] overflow-hidden bg-[#CBDABE]">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.05, 1],
-                      rotate: [0, 1, 0],
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                    }}
-                    className="absolute inset-10 rounded-[30px] border border-white/50 bg-white/20"
-                  />
-
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-8xl">
-                        📍
-                      </div>
-
-                      <div className="mt-4 text-2xl font-semibold text-[#345E3C]">
-                        Warangal
-                      </div>
-
-                      <div className="mt-1 text-sm text-[#617968]">
-                        Hanamkonda · Kazipet · Nearby
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* GROWERS                                                           */}
-        {/* ---------------------------------------------------------------- */}
-
-        <section
-          id="growers"
-          className="relative overflow-hidden bg-[#183F2A] px-5 py-28 text-white lg:px-8"
+        <Link
+          href="/about"
+          className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-[#244b2b] transition hover:text-[#a4663d]"
         >
-          <div className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full border border-white/[0.06]" />
+          Read the Amruta Dhaanya story
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </Link>
+      </motion.div>
+    </div>
+  </div>
+</section>
+        {/* ========================================================= */}
+{/* HARVEST INDEX — HOMEPAGE CATEGORY EXPERIENCE */}
+{/* ========================================================= */}
 
-          <div className="pointer-events-none absolute -bottom-60 -left-40 h-[500px] w-[500px] rounded-full border border-white/[0.05]" />
+<section className="mx-auto max-w-[1380px] px-5 py-24 lg:px-10 lg:py-36">
+  <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr]">
+    {/* Intro */}
+    <motion.div
+      initial={{ opacity: 0, x: -30 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="lg:sticky lg:top-32 lg:self-start"
+    >
+      <div className="flex items-center gap-3">
+        <span className="h-px w-10 bg-[#b97945]" />
 
-          <div className="relative mx-auto grid max-w-[1320px] items-center gap-12 lg:grid-cols-[1fr_auto]">
-            <div>
-              <Badge className="border border-white/10 bg-white/[0.08] text-[#C8D9C4] shadow-none">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#a4663d]">
+          The harvest index
+        </p>
+      </div>
+
+      <h2 className="mt-6 font-display text-[clamp(3rem,6vw,5.8rem)] leading-[0.9] tracking-[-0.055em] text-[#1d2d22]">
+        From the
+        <span className="block italic text-[#315e34]">
+          local soil.
+        </span>
+      </h2>
+
+      <p className="mt-7 max-w-[360px] text-sm leading-6 text-[#74766c]">
+        Explore the different kinds of food and harvests that
+        make up our local network.
+      </p>
+
+      <Link
+        href="/products"
+        className="mt-8 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#244b2b] transition hover:text-[#a4663d]"
+      >
+        Explore everything
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </motion.div>
+
+    {/* Category index */}
+    <div className="border-t border-[#d9d2c3]">
+      {categories.map((category, index) => (
+        <Link
+          href="/products"
+          key={category.name}
+          className="group block"
+        >
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 15,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+              margin: "-30px",
+            }}
+            transition={{
+              duration: 0.55,
+              delay: index * 0.05,
+            }}
+            className="relative flex items-center justify-between gap-6 border-b border-[#d9d2c3] py-5 transition-colors duration-300 hover:bg-[#eee9dd]"
+          >
+            {/* Number */}
+            <span className="w-10 shrink-0 font-display text-lg text-[#b97945]">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+
+            {/* Name */}
+            <div className="flex min-w-0 flex-1 items-center gap-5">
+              <h3 className="font-display text-3xl tracking-[-0.035em] text-[#26362a] transition-transform duration-300 group-hover:translate-x-2 sm:text-4xl">
+                {category.name}
+              </h3>
+            </div>
+
+            {/* Image preview */}
+            <div className="relative hidden h-20 w-28 shrink-0 overflow-hidden rounded-[12px] sm:block">
+              <Image
+                src={category.image}
+                alt=""
+                fill
+                className="object-cover grayscale-[20%] transition duration-500 group-hover:scale-110 group-hover:grayscale-0"
+                sizes="112px"
+              />
+
+              <div className="absolute inset-0 bg-[#193e25]/10 transition group-hover:bg-transparent" />
+            </div>
+
+            {/* Arrow */}
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#cfc8b9] text-[#6f746b] transition-all duration-300 group-hover:border-[#315e34] group-hover:bg-[#315e34] group-hover:text-white">
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </div>
+          </motion.div>
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
+
+        {/* ========================================================= */}
+{/* HONESTY — HOW AMRUTA DHAANYA WORKS */}
+{/* ========================================================= */}
+
+<section className="relative overflow-hidden bg-[#f6f2e9]">
+  <div className="mx-auto max-w-[1380px] px-5 py-24 lg:px-10 lg:py-36">
+    {/* Heading */}
+    <div className="grid gap-10 lg:grid-cols-[.85fr_1.15fr]">
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="h-px w-10 bg-[#b97945]" />
+
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#a4663d]">
+            How we keep it honest
+          </p>
+        </div>
+
+        <h2 className="mt-6 font-display text-[clamp(3.1rem,6vw,6rem)] leading-[0.88] tracking-[-0.055em] text-[#1d2d22]">
+          Real availability.
+          <span className="block italic text-[#b36e43]">
+            Real people.
+          </span>
+          <span className="block">No empty promises.</span>
+        </h2>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.15 }}
+        className="flex items-end"
+      >
+        <p className="max-w-[560px] text-lg leading-8 text-[#66695f]">
+          We are deliberately different from a warehouse-first,
+          instant-delivery marketplace. Our system starts with what
+          growers actually have, then builds the order around that
+          reality.
+        </p>
+      </motion.div>
+    </div>
+
+    {/* Principles */}
+    <div className="mt-16 border-t border-[#d9d2c3]">
+      {[
+        {
+          number: "01",
+          title: "Known growers",
+          text: "We work with registered local growers and sellers rather than anonymous supply.",
+        },
+        {
+          number: "02",
+          title: "Checked before listing",
+          text: "Products are reviewed before they appear. Poor-quality or unsuitable harvests simply don't make the list.",
+        },
+        {
+          number: "03",
+          title: "Confirmation before payment",
+          text: "Availability, final price and delivery are confirmed before an order is processed.",
+        },
+        {
+          number: "04",
+          title: "No warehouse fiction",
+          text: "We don't pretend something is available just because a catalogue says it is. Daily availability comes from the actual harvest.",
+        },
+      ].map((item, index) => (
+        <motion.div
+          key={item.number}
+          initial={{
+            opacity: 0,
+            y: 25,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            margin: "-50px",
+          }}
+          transition={{
+            duration: 0.65,
+            delay: index * 0.08,
+          }}
+          className="group grid gap-6 border-b border-[#d9d2c3] py-8 lg:grid-cols-[90px_1fr_1.2fr] lg:items-center lg:py-10"
+        >
+          {/* Number */}
+          <div>
+            <span className="font-display text-3xl text-[#b97945] transition-colors duration-300 group-hover:text-[#315e34]">
+              {item.number}
+            </span>
+          </div>
+
+          {/* Title */}
+          <div>
+            <h3 className="font-display text-3xl tracking-[-0.035em] text-[#24352a] sm:text-4xl">
+              {item.title}
+            </h3>
+          </div>
+
+          {/* Description */}
+          <div className="flex items-center justify-between gap-6">
+            <p className="max-w-[480px] text-sm leading-6 text-[#77776d]">
+              {item.text}
+            </p>
+
+            <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#cfc8b9] text-[#7d806f] transition-all duration-300 group-hover:border-[#315e34] group-hover:bg-[#315e34] group-hover:text-white sm:flex">
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+
+    {/* Bottom statement */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="mt-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#8b8b80]">
+          Our promise
+        </p>
+
+        <p className="mt-2 font-display text-2xl text-[#244b2b] sm:text-3xl">
+          What you see should be what you can actually receive.
+        </p>
+      </div>
+
+      <Link
+        href="/about"
+        className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-[#244b2b] transition hover:text-[#a4663d]"
+      >
+        Learn how we operate
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </motion.div>
+  </div>
+</section>
+
+     {/* ========================================================= */}
+{/* ORIGIN / TRACEABILITY */}
+{/* ========================================================= */}
+
+<section className="bg-[#193e25] text-[#f7f2e7]">
+  <div className="mx-auto max-w-[1380px] px-5 py-20 lg:px-10 lg:py-28">
+    <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+      
+      {/* LEFT */}
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d5a15c]">
+          Know the source
+        </p>
+
+        <h2 className="mt-5 max-w-[520px] font-display text-5xl leading-[0.94] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
+          Your food should
+          <span className="block italic text-[#d5a15c]">
+            have an origin.
+          </span>
+        </h2>
+
+        <p className="mt-7 max-w-[430px] text-sm leading-7 text-white/65">
+          Amruta Dhaanya is built around a simple idea — when food comes
+          from nearby, you should be able to understand where it came
+          from, who supplied it and whether it is actually available.
+        </p>
+
+        <Link
+          href="/about"
+          className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#f4d29c] transition hover:gap-3"
+        >
+          Why we built this
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+
+      {/* RIGHT */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {[
+          {
+            number: "01",
+            title: "The grower",
+            text: "We know who is supplying the harvest rather than relying on anonymous marketplace listings.",
+          },
+          {
+            number: "02",
+            title: "The harvest",
+            text: "Availability is based on what is genuinely available today — not warehouse inventory.",
+          },
+          {
+            number: "03",
+            title: "The check",
+            text: "Products are reviewed before they are listed so families know what they are requesting.",
+          },
+          {
+            number: "04",
+            title: "The confirmation",
+            text: "Stock, price and delivery are confirmed before the order moves forward.",
+          },
+        ].map((item, index) => (
+          <motion.div
+            key={item.number}
+            initial={{
+              opacity: 0,
+              y: 25,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+              margin: "-80px",
+            }}
+            transition={{
+              duration: 0.65,
+              delay: index * 0.1,
+            }}
+            className="group rounded-[22px] border border-white/10 bg-white/[0.035] p-7 transition duration-500 hover:border-[#d5a15c]/40 hover:bg-white/[0.06]"
+          >
+            <div className="flex items-start justify-between">
+              <span className="font-display text-3xl text-[#d5a15c]">
+                {item.number}
+              </span>
+
+              <ArrowRight className="h-4 w-4 text-white/25 transition duration-300 group-hover:translate-x-1 group-hover:text-[#d5a15c]" />
+            </div>
+
+            <h3 className="mt-12 text-base font-semibold">
+              {item.title}
+            </h3>
+
+            <p className="mt-3 text-sm leading-6 text-white/55">
+              {item.text}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+
+    {/* BOTTOM STATEMENT */}
+    <div className="mt-16 border-t border-white/10 pt-7 lg:mt-20">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-display text-2xl tracking-[-0.02em] text-white/90 sm:text-3xl">
+          From someone you can know.
+          <span className="italic text-[#d5a15c]">
+            To someone you can trust.
+          </span>
+        </p>
+
+        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
+          Ahaar Kutumbam Initiative
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+        {/* ========================================================= */}
+        {/* GROWER CTA */}
+        {/* ========================================================= */}
+
+        <section className="mx-auto max-w-[1380px] px-5 py-20 lg:px-10 lg:py-28">
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 30,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              duration: 0.9,
+            }}
+            className="grid overflow-hidden rounded-[26px] bg-[#d7c19e] lg:grid-cols-[1fr_.85fr]"
+          >
+            <div className="relative min-h-[390px]">
+              <Image
+                src={image3}
+                alt="Flowering local harvest"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 55vw"
+              />
+            </div>
+
+            <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
+              <p className="section-kicker !text-[#785d3f]">
                 For local harvest households
-              </Badge>
+              </p>
 
-              <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-0.045em] sm:text-5xl">
-                If your harvest is small, it can still have value.
+              <h2 className="mt-4 font-display text-5xl leading-[.95] tracking-[-0.04em] text-[#1f2e23] sm:text-6xl">
+                A small harvest
+                <span className="block italic text-[#315e34]">
+                  should never feel small.
+                </span>
               </h2>
 
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-[#C9D9C5]">
-                Many homes, terrace gardens, backyard
-                growers and local growing families may have
-                limited but useful harvests. Amruta Dhaanya
-                creates a simple path for genuine local
-                supply to reach nearby households.
+              <p className="mt-6 max-w-[510px] text-sm leading-6 text-[#5e5d52]">
+                Terrace gardens, backyard growers and local growing families
+                may have limited but useful harvests. Amruta Dhaanya creates
+                a simple path for genuine local supply to reach nearby
+                households.
               </p>
 
               <Button
-                size="lg"
-                className="mt-8 h-[52px] rounded-full bg-[#D5E2D0] px-7 font-semibold text-[#183F2A] shadow-lg hover:bg-[#C7D8C1] hover:text-[#183F2A]"
                 asChild
+                className="mt-8 h-12 w-fit rounded-full bg-[#193e25] px-7 text-sm text-white hover:bg-[#12301b]"
               >
                 <Link href="/share-your-harvest">
                   Register as a Grower
@@ -1524,245 +1547,208 @@ export default function Home() {
                 </Link>
               </Button>
             </div>
-
-            <motion.div
-              animate={{
-                y: [0, -12, 0],
-                rotate: [0, 3, -3, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-              }}
-              className="flex h-48 w-48 items-center justify-center rounded-full border border-white/10 bg-white/[0.07] text-8xl shadow-[0_20px_60px_rgba(0,0,0,.15)]"
-            >
-              🌾
-            </motion.div>
-          </div>
+          </motion.div>
         </section>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* FAQ                                                               */}
-        {/* ---------------------------------------------------------------- */}
+        {/* ========================================================= */}
+        {/* FAQ */}
+        {/* ========================================================= */}
 
-        <section
-          id="faq"
-          className="bg-[#F8F5EC] px-5 py-28 lg:px-8"
-        >
-          <div className="mx-auto max-w-[920px]">
-            <div className="text-center">
-              <SectionLabel>
-                Questions
-              </SectionLabel>
+        <section className="mx-auto max-w-[1380px] px-5 pb-20 lg:px-10 lg:pb-28">
+          <div className="grid gap-10 lg:grid-cols-[.75fr_1.25fr]">
+            <div>
+              <p className="section-kicker">Questions</p>
 
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#183F2A] sm:text-5xl">
-                Frequently asked questions
+              <h2 className="section-title mt-4">
+                Everything you need to know.
               </h2>
 
-              <p className="mt-4 text-[#6C796F]">
-                Everything you need to know about ordering
-                from Amruta Dhaanya.
+              <p className="mt-5 max-w-[330px] text-sm leading-6 text-[#77776d]">
+                Clear answers about availability, growers, traditional foods
+                and delivery.
               </p>
             </div>
 
-            <Accordion
-              type="single"
-              collapsible
-              className="mt-12 rounded-[28px] border border-[#DCE4D8] bg-[#FCFAF4] px-6 shadow-[0_10px_35px_rgba(24,63,42,.04)] sm:px-8"
-            >
-              {faqs.map((faq, index) => (
-                <AccordionItem
-                  key={faq.question}
-                  value={`faq-${index}`}
-                  className="border-[#DCE4D8]"
+            <div className="border-t border-[#d9d2c3]">
+              {faqs.map(([question, answer], index) => (
+                <div
+                  key={question}
+                  className="border-b border-[#d9d2c3]"
                 >
-                  <AccordionTrigger className="py-6 text-left text-base font-semibold text-[#203128] hover:no-underline">
-                    {faq.question}
-                  </AccordionTrigger>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFaqOpen(
+                        faqOpen === index ? null : index
+                      )
+                    }
+                    className="flex w-full items-center justify-between gap-6 py-5 text-left"
+                  >
+                    <span className="text-sm font-medium text-[#26372b]">
+                      {question}
+                    </span>
 
-                  <AccordionContent className="pb-6 text-sm leading-7 text-[#68766D]">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-[#7d806f] transition ${
+                        faqOpen === index ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {faqOpen === index && (
+                    <motion.p
+                      initial={{
+                        opacity: 0,
+                        height: 0,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        height: "auto",
+                      }}
+                      transition={{
+                        duration: 0.35,
+                      }}
+                      className="max-w-[760px] overflow-hidden pb-6 pr-10 text-sm leading-6 text-[#77776d]"
+                    >
+                      {answer}
+                    </motion.p>
+                  )}
+                </div>
               ))}
-            </Accordion>
+            </div>
           </div>
         </section>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* FOOTER                                                              */}
-      {/* ------------------------------------------------------------------ */}
+      {/* =========================================================== */}
+      {/* FOOTER */}
+      {/* =========================================================== */}
 
-      <footer className="bg-[#10301F] px-5 py-16 text-white lg:px-8">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="grid gap-12 md:grid-cols-[1.6fr_.7fr_.7fr]">
-            {/* BRAND */}
-
+      <footer className="border-t border-[#d9d2c3] bg-[#efeade]">
+        <div className="mx-auto max-w-[1380px] px-5 py-14 lg:px-10 lg:py-16">
+          <div className="grid gap-12 md:grid-cols-[1.3fr_.7fr_.7fr]">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-white/20">
+                <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-[#d0c9ba] bg-white">
                   <Image
-                  src="/amruta-dhaanya-logo.png"
-                  alt="Amruta Dhaanya"
-                  width={56}
-                  height={56}
-                  className="h-full w-full object-contain p-1"
-                />
-                </div>
+                    src="/amruta-dhaanya-logo.png"
+                    alt="Amruta Dhaanya"
+                    width={44}
+                    height={44}
+                    className="h-full w-full object-contain p-1"
+                  />
+                </span>
 
                 <div>
-                  <div className="text-xl font-semibold tracking-tight">
-                    Amruta Dhaanya
-                  </div>
+                  <p className="text-sm font-semibold text-[#193e25]">
+                    AMRUTA DHAANYA™
+                  </p>
 
-                  <div className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-[#A9BFA9]">
+                  <p className="text-[8px] uppercase tracking-[0.22em] text-[#7d806f]">
                     An Ahaar Kutumbam Initiative
-                  </div>
+                  </p>
                 </div>
               </div>
 
-              <p className="mt-6 max-w-lg text-sm leading-7 text-[#B7C4B9]">
-                Fresh, traditional food sourced directly
-                from growers — selected carefully, handled
-                honestly and shared through a trusted local
-                network.
+              <p className="mt-6 max-w-[430px] text-sm leading-6 text-[#77776d]">
+                Fresh, traditional food sourced directly from growers —
+                selected carefully, handled honestly and shared through a
+                trusted local network.
               </p>
 
-              <div className="mt-7 space-y-2 text-sm text-[#B7C4B9]">
-                <div>
-                  Phone: +91 9177751088
-                </div>
-
-                <div>
-                  Email: amrutadhaanya@gmail.com
-                </div>
-
-                <div>
-                  Location: Vangapahad, Warangal,
-                  Telangana 506006
-                </div>
-              </div>
+              <p className="mt-5 text-xs leading-5 text-[#77776d]">
+                Vangapahad, Warangal, Telangana 506006
+                <br />
+                +91 9177751088 · amrutadhaanya@gmail.com
+              </p>
             </div>
 
-            {/* EXPLORE */}
-
             <div>
-              <h3 className="text-sm font-semibold text-white">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#a4663d]">
                 Explore
-              </h3>
+              </p>
 
-              <div className="mt-5 flex flex-col gap-3 text-sm text-[#B7C4B9]">
-                <Link
-                  href="#home"
-                  className="transition-colors hover:text-white"
-                >
-                  Home
+              <div className="mt-5 flex flex-col gap-3 text-sm text-[#465148]">
+                <Link href="/">Home</Link>
+                <Link href="/products">
+                  Today's Fresh List
                 </Link>
-
-                <Link
-                  href="#fresh"
-                  className="transition-colors hover:text-white"
-                >
-                  Today&apos;s Fresh List
-                </Link>
-
-                <Link
-                  href="#products"
-                  className="transition-colors hover:text-white"
-                >
+                <Link href="/products">
                   Fresh Baskets
                 </Link>
-
-                <Link
-                  href="/share-your-harvest"
-                  className="transition-colors hover:text-white"
-                >
+                <Link href="/share-your-harvest">
                   Share Your Harvest
                 </Link>
-
-                <Link
-                  href="#about"
-                  className="transition-colors hover:text-white"
-                >
-                  About Us
-                </Link>
+                <Link href="/about">About Us</Link>
               </div>
             </div>
-
-            {/* TRUST */}
-
             <div>
-              <h3 className="text-sm font-semibold text-white">
-                Trust
-              </h3>
+  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#a4663d]">
+    Trust & support
+  </p>
 
-              <div className="mt-5 flex flex-col gap-3 text-sm text-[#B7C4B9]">
-                <Link
-                  href="/Participate"
-                  className="transition-colors hover:text-white"
-                >
-                  Participate
-                </Link>
+  <div className="mt-5 flex flex-col gap-3 text-sm text-[#465148]">
+    <Link
+      href="/grower-register"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      Become a Grower
+    </Link>
 
-                <Link
-                  href="/share-your-harvest"
-                  className="transition-colors hover:text-white"
-                >
-                  Become a Grower
-                </Link>
+    <Link
+      href="/Participate"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      Participate
+    </Link>
 
-                <Link
-                  href="/FAQ"
-                  className="transition-colors hover:text-white"
-                >
-                  FAQ
-                </Link>
+    <Link
+      href="/FAQ"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      FAQ
+    </Link>
 
-                <Link
-                  href="/contact-us"
-                  className="transition-colors hover:text-white"
-                >
-                  Contact Us
-                </Link>
+    <Link
+      href="/contact-us"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      Contact Us
+    </Link>
 
-                <Link
-                  href="/legal"
-                  className="transition-colors hover:text-white"
-                >
-                  Legal & Policies
-                </Link>
+    <Link
+      href="/legal"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      Legal & Policies
+    </Link>
 
-                <Link
-                  href="/cart"
-                  className="transition-colors hover:text-white"
-                >
-                  Cart
-                </Link>
+    <Link
+      href="/cart"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      Cart
+    </Link>
 
-                <Link
-                  href="/login"
-                  className="transition-colors hover:text-white"
-                >
-                  Login
-                </Link>
-              </div>
-            </div>
+    <Link
+      href="/login"
+      className="transition-colors hover:text-[#193e25]"
+    >
+      Login
+    </Link>
+  </div>
+</div>
           </div>
 
-          {/* FOOTER BOTTOM */}
+          <div className="mt-12 flex flex-col gap-2 border-t border-[#d9d2c3] pt-5 text-[10px] uppercase tracking-[0.12em] text-[#85857a] sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              © 2026 Amruta Dhaanya. All rights reserved.
+            </span>
 
-          <div className="mt-14 border-t border-white/10 pt-7">
-            <div className="flex flex-col justify-between gap-3 text-xs text-[#899A8D] sm:flex-row">
-              <div>
-                © 2026 Amruta Dhaanya. All rights reserved.
-              </div>
-
-              <div>
-                A trusted local harvest network built around
-                real daily availability and community care.
-              </div>
-            </div>
+            <span>
+              A trusted local harvest network built around real daily
+              availability.
+            </span>
           </div>
         </div>
       </footer>
